@@ -175,13 +175,13 @@ const Dashboard: React.FC<DashboardProps> = ({ projectId }) => {
             />
             <div className="flex items-center">
               <div className="flex -space-x-3 mr-3">
-                <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform" style={{ backgroundColor: "hsl(var(--primary))" }}>
                   A
                 </div>
-                <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform" style={{ backgroundColor: "hsl(var(--focused))" }}>
                   J
                 </div>
-                <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform" style={{ backgroundColor: "hsl(var(--energetic))" }}>
                   M
                 </div>
               </div>
