@@ -1,16 +1,15 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useSketchPad } from '@/hooks/use-sketch-pad';
 import { Undo, Redo, Eraser, Pencil, MousePointer, Trash } from 'lucide-react';
 import MoodSelector from '@/components/ui/MoodSelector';
 import IntensitySlider from '@/components/ui/IntensitySlider';
+import SimpleCanvas from '@/components/ui/simple-canvas';
 import { MoodType } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -42,20 +41,14 @@ const SketchTool: React.FC<SketchToolProps> = ({
   defaultIntensity = 50,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
   
-  const {
-    state,
-    initCanvas,
-    setMode,
-    setColor,
-    setBrushSize,
-    clearCanvas,
-    undo,
-    redo,
-    exportAsSVG,
-  } = useSketchPad();
+  // State for canvas controls
+  const [canvasState, setCanvasState] = useState({
+    mode: 'draw' as 'draw' | 'erase' | 'select',
+    color: '#4FC3F7',
+    brushSize: 3
+  });
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,48 +60,26 @@ const SketchTool: React.FC<SketchToolProps> = ({
     },
   });
   
-  // Initialize canvas when component mounts
-  useEffect(() => {
-    let cleanup: (() => void) | undefined;
-    
-    if (isOpen && containerRef.current && canvasRef.current) {
-      // Small delay to ensure the DOM is fully rendered
-      const timer = setTimeout(() => {
-        cleanup = initCanvas(canvasRef.current!, containerRef.current!);
-        
-        // Set initial color and brush size after a slight delay
-        setTimeout(() => {
-          setColor(state.color);
-          setBrushSize(state.brushSize);
-        }, 50);
-      }, 100);
-      
-      return () => {
-        clearTimeout(timer);
-        if (cleanup) cleanup();
-      };
-    }
-  }, [isOpen, initCanvas]);
-  
   // Handle color selection
   const handleColorChange = (color: string) => {
-    setColor(color);
+    setCanvasState(prev => ({ ...prev, color }));
   };
+  
+  // Keep track of the current SVG content
+  const [currentSvgContent, setCurrentSvgContent] = useState<string>('');
   
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!canvasRef.current) {
-      toast({
-        title: "Error",
-        description: "Canvas not initialized",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     try {
-      // Convert sketch to SVG
-      const svgContent = exportAsSVG();
+      // Check if we have SVG content
+      if (!currentSvgContent) {
+        toast({
+          title: "Error",
+          description: "Please draw something first",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Create node with the SVG content
       const response = await apiRequest("POST", "/api/nodes", {
@@ -116,7 +87,7 @@ const SketchTool: React.FC<SketchToolProps> = ({
         type: "sketch",
         title: values.title,
         description: values.description || "",
-        content: svgContent,
+        content: currentSvgContent,
         positionX: defaultPosition.x,
         positionY: defaultPosition.y,
         mood: values.mood,
@@ -225,27 +196,27 @@ const SketchTool: React.FC<SketchToolProps> = ({
                 <div className="flex space-x-1">
                   <Button
                     type="button"
-                    variant={state.mode === 'draw' ? 'default' : 'outline'}
+                    variant={canvasState.mode === 'draw' ? 'default' : 'outline'}
                     size="icon"
-                    onClick={() => setMode('draw')}
+                    onClick={() => setCanvasState(prev => ({ ...prev, mode: 'draw' }))}
                     className="h-8 w-8"
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     type="button"
-                    variant={state.mode === 'erase' ? 'default' : 'outline'}
+                    variant={canvasState.mode === 'erase' ? 'default' : 'outline'}
                     size="icon"
-                    onClick={() => setMode('erase')}
+                    onClick={() => setCanvasState(prev => ({ ...prev, mode: 'erase' }))}
                     className="h-8 w-8"
                   >
                     <Eraser className="h-4 w-4" />
                   </Button>
                   <Button
                     type="button"
-                    variant={state.mode === 'select' ? 'default' : 'outline'}
+                    variant={canvasState.mode === 'select' ? 'default' : 'outline'}
                     size="icon"
-                    onClick={() => setMode('select')}
+                    onClick={() => setCanvasState(prev => ({ ...prev, mode: 'select' }))}
                     className="h-8 w-8"
                   >
                     <MousePointer className="h-4 w-4" />
@@ -257,8 +228,6 @@ const SketchTool: React.FC<SketchToolProps> = ({
                     type="button"
                     variant="outline"
                     size="icon"
-                    onClick={undo}
-                    disabled={!state.canUndo}
                     className="h-8 w-8"
                   >
                     <Undo className="h-4 w-4" />
@@ -267,8 +236,6 @@ const SketchTool: React.FC<SketchToolProps> = ({
                     type="button"
                     variant="outline"
                     size="icon"
-                    onClick={redo}
-                    disabled={!state.canRedo}
                     className="h-8 w-8"
                   >
                     <Redo className="h-4 w-4" />
@@ -277,7 +244,6 @@ const SketchTool: React.FC<SketchToolProps> = ({
                     type="button"
                     variant="outline"
                     size="icon"
-                    onClick={clearCanvas}
                     className="h-8 w-8"
                   >
                     <Trash className="h-4 w-4" />
@@ -289,31 +255,31 @@ const SketchTool: React.FC<SketchToolProps> = ({
                 <div className="flex space-x-1">
                   <button
                     type="button"
-                    className={`w-6 h-6 rounded-full ${state.color === '#4FC3F7' ? 'ring-2 ring-primary' : ''}`}
+                    className={`w-6 h-6 rounded-full ${canvasState.color === '#4FC3F7' ? 'ring-2 ring-primary' : ''}`}
                     style={{ backgroundColor: '#4FC3F7' }}
                     onClick={() => handleColorChange('#4FC3F7')}
                   />
                   <button
                     type="button"
-                    className={`w-6 h-6 rounded-full ${state.color === '#FF9800' ? 'ring-2 ring-primary' : ''}`}
+                    className={`w-6 h-6 rounded-full ${canvasState.color === '#FF9800' ? 'ring-2 ring-primary' : ''}`}
                     style={{ backgroundColor: '#FF9800' }}
                     onClick={() => handleColorChange('#FF9800')}
                   />
                   <button
                     type="button"
-                    className={`w-6 h-6 rounded-full ${state.color === '#7E57C2' ? 'ring-2 ring-primary' : ''}`}
+                    className={`w-6 h-6 rounded-full ${canvasState.color === '#7E57C2' ? 'ring-2 ring-primary' : ''}`}
                     style={{ backgroundColor: '#7E57C2' }}
                     onClick={() => handleColorChange('#7E57C2')}
                   />
                   <button
                     type="button"
-                    className={`w-6 h-6 rounded-full ${state.color === '#F06292' ? 'ring-2 ring-primary' : ''}`}
+                    className={`w-6 h-6 rounded-full ${canvasState.color === '#F06292' ? 'ring-2 ring-primary' : ''}`}
                     style={{ backgroundColor: '#F06292' }}
                     onClick={() => handleColorChange('#F06292')}
                   />
                   <button
                     type="button"
-                    className={`w-6 h-6 rounded-full ${state.color === '#66BB6A' ? 'ring-2 ring-primary' : ''}`}
+                    className={`w-6 h-6 rounded-full ${canvasState.color === '#66BB6A' ? 'ring-2 ring-primary' : ''}`}
                     style={{ backgroundColor: '#66BB6A' }}
                     onClick={() => handleColorChange('#66BB6A')}
                   />
@@ -325,21 +291,24 @@ const SketchTool: React.FC<SketchToolProps> = ({
                     type="range"
                     min="1"
                     max="20"
-                    value={state.brushSize}
-                    onChange={(e) => setBrushSize(parseInt(e.target.value))}
+                    value={canvasState.brushSize}
+                    onChange={(e) => setCanvasState(prev => ({ ...prev, brushSize: parseInt(e.target.value) }))}
                     className="w-24"
                   />
                 </div>
               </div>
               
               <div ref={containerRef} className="w-full h-64 relative overflow-hidden rounded-md border bg-[rgba(30,30,30,0.9)]">
-                <canvas 
-                  ref={canvasRef} 
-                  className="absolute inset-0 w-full h-full touch-none" 
-                  style={{ 
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'none' 
+                <SimpleCanvas 
+                  width={containerRef.current?.offsetWidth || 600}
+                  height={300}
+                  color={canvasState.color}
+                  brushSize={canvasState.brushSize}
+                  mode={canvasState.mode === 'erase' ? 'erase' : 'draw'}
+                  className="absolute inset-0 w-full h-full" 
+                  onDrawEnd={(svgContent) => {
+                    console.log("Drawing completed, SVG content available");
+                    setCurrentSvgContent(svgContent);
                   }}
                 />
               </div>
