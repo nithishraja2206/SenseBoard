@@ -227,12 +227,39 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
       {/* Breadcrumb navigation */}
       {moodBoard && (
         <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
-          <SimpleBreadcrumb 
-            items={[
-              { label: project?.name || `Project #${moodBoard.projectId}`, href: `/project/${moodBoard.projectId}` },
-              { label: moodBoard.name }
-            ]}
-          />
+          <div className="flex justify-between items-center">
+            <SimpleBreadcrumb 
+              items={[
+                { label: project?.name || `Project #${moodBoard.projectId}`, href: `/project/${moodBoard.projectId}` },
+                { label: moodBoard.name }
+              ]}
+            />
+            <div className="flex items-center">
+              <div className="flex -space-x-2 mr-2">
+                <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white cursor-pointer hover:ring-2 hover:ring-primary-foreground">
+                  A
+                </div>
+                <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white">
+                  J
+                </div>
+                <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white">
+                  M
+                </div>
+              </div>
+              <div className="relative">
+                <button
+                  className="flex items-center gap-1 text-xs bg-secondary/50 rounded-full px-2 py-1 hover:bg-secondary/80 transition-colors"
+                  onClick={() => toast({
+                    title: "Team Collaboration",
+                    description: "This will open the team invitation dialog."
+                  })}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                  Add Team
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       
