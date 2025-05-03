@@ -234,20 +234,16 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
   
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Sub-navigation for mood board */}
+      {/* Breadcrumb navigation */}
       {moodBoard && (
         <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
           <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <h2 className="text-lg font-display font-semibold">{moodBoard.name}</h2>
-              <div className="h-5 w-px bg-border mx-4"></div>
-              <SimpleBreadcrumb 
-                items={[
-                  { label: 'Canvas View', href: `/moodboard/${moodBoard.id}` },
-                  { label: 'Flow Map', href: `/flowmap/${moodBoard.id}` }
-                ]}
-              />
-            </div>
+            <SimpleBreadcrumb 
+              items={[
+                { label: project?.name || `Project #${moodBoard.projectId}`, href: `/project/${moodBoard.projectId}` },
+                { label: moodBoard.name }
+              ]}
+            />
             <div className="flex items-center">
               <div className="flex -space-x-3 mr-3">
                 <div className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform" style={{ backgroundColor: "hsl(var(--primary))" }}>

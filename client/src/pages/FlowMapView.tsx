@@ -118,16 +118,13 @@ const FlowMapView: React.FC<FlowMapViewProps> = ({ moodBoardId }) => {
       {/* Breadcrumb navigation */}
       <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <h2 className="text-lg font-display font-semibold">{moodBoard?.name || 'Mood Board'}</h2>
-            <div className="h-5 w-px bg-border mx-4"></div>
-            <SimpleBreadcrumb 
-              items={[
-                { label: 'Canvas View', href: `/moodboard/${moodBoardId}` },
-                { label: 'Flow Map', href: `/flowmap/${moodBoardId}` }
-              ]}
-            />
-          </div>
+          <SimpleBreadcrumb 
+            items={[
+              { label: project?.name || `Project #${moodBoard?.projectId}`, href: `/project/${moodBoard?.projectId}` },
+              { label: moodBoard?.name || 'Mood Board', href: `/moodboard/${moodBoardId}` },
+              { label: 'Flow Map' }
+            ]}
+          />
           <div className="flex items-center">
             <div className="flex -space-x-3 mr-3">
               <div className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform" style={{ backgroundColor: "hsl(var(--primary))" }}>
