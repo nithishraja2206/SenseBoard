@@ -69,9 +69,19 @@ const InspirationCard: React.FC<InspirationCardProps> = ({
     mutationFn: (updatedNode: Partial<InspirationNode>) => {
       return apiRequest('PATCH', `/api/nodes/${node.id}`, updatedNode);
     },
-    onSuccess: () => {
-      // Invalidate queries
+    onSuccess: (data) => {
+      // Invalidate queries and refetch to update the UI
       queryClient.invalidateQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
+      queryClient.refetchQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
+      
+      // Update local state of the node
+      if (data) {
+        // Update form fields with new data
+        setTitle(data.title);
+        setDescription(data.description || '');
+        setSelectedMood(data.mood as MoodType);
+        setIntensityValue(data.intensity);
+      }
       
       // Show success toast
       toast({
