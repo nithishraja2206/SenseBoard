@@ -245,15 +245,15 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
               ]}
             />
             <div className="flex items-center">
-              <div className="flex -space-x-2 mr-2">
-                <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white cursor-pointer hover:ring-2 hover:ring-primary-foreground">
-                  A
+              <div className="flex -space-x-3 mr-3">
+                <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white font-medium text-sm shadow-md cursor-pointer hover:scale-110 transition-transform">
+                  AM
                 </div>
-                <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white">
-                  J
+                <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white font-medium text-sm shadow-md cursor-pointer hover:scale-110 transition-transform">
+                  JL
                 </div>
-                <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white">
-                  M
+                <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white font-medium text-sm shadow-md cursor-pointer hover:scale-110 transition-transform">
+                  MS
                 </div>
               </div>
               <Dialog>
