@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Plus, Calendar, ArrowRight } from 'lucide-react';
 import { Project, MoodBoard, TeamMood } from '@shared/schema';
+import SimpleBreadcrumb from '@/components/ui/Breadcrumb';
 
 
 interface DashboardProps {
@@ -164,6 +165,16 @@ const Dashboard: React.FC<DashboardProps> = ({ projectId }) => {
   
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
+      {projectId && (
+        <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
+          <SimpleBreadcrumb 
+            items={[
+              { label: 'All Projects', href: '/' },
+              { label: selectedProject?.name || `Project #${projectId}` }
+            ]}
+          />
+        </div>
+      )}
       <div className="container mx-auto p-6">
         {!projectId ? (
           <>
