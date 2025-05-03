@@ -17,9 +17,56 @@ import {
 } from '@/components/ui/dialog';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
+// Define the notification type
+interface Notification {
+  title: string;
+  description: string;
+  time: string;
+  initials: string;
+  color: string;
+  read: boolean;
+}
+
 const TopBar: React.FC = () => {
   const [location] = useLocation();
   const { toast } = useToast();
+  const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
+  
+  // Sample notifications data
+  const notifications: Notification[] = [
+    {
+      title: "Jamie shared a new audio clip",
+      description: "In 'Interaction & Flow' mood board",
+      time: "5 minutes ago",
+      initials: "J",
+      color: "bg-focused",
+      read: false
+    },
+    {
+      title: "Maria updated project details",
+      description: "Changes to 'Serenity Wellness App' description",
+      time: "25 minutes ago",
+      initials: "M",
+      color: "bg-energetic",
+      read: false
+    },
+    {
+      title: "New team mood data",
+      description: "Team is currently feeling energetic",
+      time: "1 hour ago",
+      initials: "S",
+      color: "bg-primary",
+      read: true
+    },
+    {
+      title: "Alex commented on your sketch",
+      description: "Left feedback on 'Initial UI Concept'",
+      time: "3 hours ago",
+      initials: "A",
+      color: "bg-calm",
+      read: true
+    }
+  ];
   
   // Create a team mood mutation
   const createTeamMoodMutation = useMutation({
@@ -308,27 +355,60 @@ const TopBar: React.FC = () => {
           </svg>
         </div>
         
-        <Button 
-          className="flex items-center space-x-1 primary-gradient px-3 py-1.5 rounded-lg text-sm font-medium"
-          onClick={handleNewInspiration}
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            className="mr-1"
+        <div className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
           >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-          <span>New Inspiration</span>
-        </Button>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-primary"></span>
+          </Button>
+          
+          {isNotificationOpen && (
+            <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg border border-border z-50">
+              <div className="p-3 border-b border-border">
+                <h3 className="font-medium">Notifications</h3>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                {notifications.map((notification, index) => (
+                  <div 
+                    key={index} 
+                    className="p-3 hover:bg-secondary border-b border-border last:border-0 cursor-pointer"
+                  >
+                    <div className="flex items-start">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.color} text-white mr-3 flex-shrink-0`}>
+                        {notification.initials}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{notification.title}</p>
+                        <p className="text-xs text-muted-foreground">{notification.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-2 border-t border-border">
+                <Button variant="ghost" size="sm" className="w-full text-xs">View all notifications</Button>
+              </div>
+            </div>
+          )}
+        </div>
         
         {projectId ? (
           <div className="flex items-center">
