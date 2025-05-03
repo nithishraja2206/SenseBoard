@@ -44,13 +44,34 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
       const newUrl = location.split('?')[0];
       window.history.replaceState({}, '', newUrl);
       
-      // Open a default tool (e.g., sketch)
-      setActiveTool({
-        type: 'sketch',
-        isOpen: true,
+      // Show a guidance toast
+      toast({
+        title: "Create New Inspiration",
+        description: "Choose the type of inspiration that best fits your idea. Add sketches, images, audio clips, or written thoughts to your mood board.",
+        duration: 6000,
       });
+      
+      // Open the inspiration selector dialog
+      setTimeout(() => {
+        // Set a random position in the viewport
+        const canvasWidth = window.innerWidth - 200; // Adjust for panels
+        const canvasHeight = window.innerHeight - 100; // Adjust for header
+        
+        const position = {
+          x: Math.max(100, Math.random() * (canvasWidth - 300)),
+          y: Math.max(100, Math.random() * (canvasHeight - 200)),
+        };
+        
+        setToolPosition(position);
+        
+        // Show the inspiration selector dialog
+        setActiveTool({
+          type: 'sketch', // Default to sketch as a starting tool
+          isOpen: true,
+        });
+      }, 500);
     }
-  }, [newInspirationParam, location]);
+  }, [newInspirationParam, location, toast]);
   
   // Fetch mood board data
   const { data: moodBoard, isLoading: isLoadingMoodBoard } = useQuery({
@@ -101,7 +122,14 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
   
   // Handle adding new inspiration
   const handleAddInspiration = () => {
-    // Set a random position in the viewport
+    // Show guidance toast
+    toast({
+      title: "Add New Inspiration",
+      description: "Choose what inspires you - sketch an idea, upload an image, record audio, or write down your thoughts.",
+      duration: 5000,
+    });
+    
+    // Set a position in the center of the viewport
     const canvasWidth = window.innerWidth - 200; // Adjust for panels
     const canvasHeight = window.innerHeight - 100; // Adjust for header
     
@@ -112,9 +140,9 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
     
     setToolPosition(position);
     
-    // Show the sketch tool by default
+    // Open tool selector dialog
     setActiveTool({
-      type: 'sketch',
+      type: 'sketch', // Default to sketch tool
       isOpen: true,
     });
   };

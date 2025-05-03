@@ -2,15 +2,39 @@ import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { calculateTeamAura } from '@/lib/mood-utils';
 import { MoodType } from '@shared/schema';
 import { TeamAuraData } from '@/types';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 const TopBar: React.FC = () => {
   const [location] = useLocation();
   const { toast } = useToast();
+  
+  // Create a team mood mutation
+  const createTeamMoodMutation = useMutation({
+    mutationFn: (data: { projectId: number, mood: MoodType, intensity: number }) => {
+      return apiRequest('POST', '/api/moods', {
+        projectId: data.projectId,
+        userId: 1, // Default user for demo
+        mood: data.mood,
+        intensity: data.intensity,
+      });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', variables.projectId, 'mood-summary'] });
+    },
+  });
   
   // Extract project ID from location if available
   const projectIdMatch = location.match(/\/project\/(\d+)/);
@@ -120,18 +144,146 @@ const TopBar: React.FC = () => {
       </div>
       
       <div className="flex items-center space-x-5">
-        {/* Mood palette selector */}
-        <div className="flex items-center space-x-2">
-          <div className="w-5 h-5 rounded-full bg-[hsl(var(--calm))] cursor-pointer" title="Calm"></div>
-          <div className="w-5 h-5 rounded-full bg-[hsl(var(--energetic))] cursor-pointer" title="Energetic"></div>
-          <div className="w-5 h-5 rounded-full bg-[hsl(var(--focused))] cursor-pointer" title="Focused"></div>
-          <div className="w-5 h-5 rounded-full bg-surface flex items-center justify-center cursor-pointer" title="Add mood">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="M12 5v14" />
-            </svg>
+        {/* Current Mood Selector */}
+        {projectId && (
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground mr-1">Your Mood:</span>
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                if (projectId) {
+                  createTeamMoodMutation.mutate({
+                    projectId,
+                    mood: "calm",
+                    intensity: 85
+                  });
+                  toast({
+                    title: "Mood Updated",
+                    description: "You're feeling calm now.",
+                  });
+                }
+              }} 
+              className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--calm))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'calm' ? 'ring-2 ring-white' : ''}`} 
+              title="Calm"
+            />
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                if (projectId) {
+                  createTeamMoodMutation.mutate({
+                    projectId,
+                    mood: "energetic",
+                    intensity: 85
+                  });
+                  toast({
+                    title: "Mood Updated",
+                    description: "You're feeling energetic now.",
+                  });
+                }
+              }} 
+              className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--energetic))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'energetic' ? 'ring-2 ring-white' : ''}`} 
+              title="Energetic"
+            />
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                if (projectId) {
+                  createTeamMoodMutation.mutate({
+                    projectId,
+                    mood: "focused",
+                    intensity: 85
+                  });
+                  toast({
+                    title: "Mood Updated",
+                    description: "You're feeling focused now.",
+                  });
+                }
+              }} 
+              className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--focused))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'focused' ? 'ring-2 ring-white' : ''}`}
+              title="Focused"
+            />
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" className="w-5 h-5 p-0 rounded-full bg-surface flex items-center justify-center hover:bg-secondary" title="More mood options">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                  </svg>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Set Your Current Mood</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-3 gap-3 my-4">
+                  {["calm", "energetic", "focused", "playful", "serious"].map((mood) => (
+                    <Button 
+                      key={mood}
+                      variant="outline"
+                      onClick={() => {
+                        if (projectId) {
+                          createTeamMoodMutation.mutate({
+                            projectId,
+                            mood: mood as MoodType,
+                            intensity: 85
+                          });
+                        }
+                      }}
+                      className="flex flex-col items-center p-3 h-auto gap-2"
+                    >
+                      <div 
+                        className={`w-10 h-10 rounded-full`}
+                        style={{ 
+                          backgroundColor: mood === 'calm' ? 'hsl(var(--calm))' : 
+                                        mood === 'energetic' ? 'hsl(var(--energetic))' : 
+                                        mood === 'focused' ? 'hsl(var(--focused))' :
+                                        mood === 'playful' ? 'hsl(346, 84%, 61%)' :
+                                        'hsl(220, 9%, 46%)'
+                        }}
+                      />
+                      <span className="capitalize">{mood}</span>
+                    </Button>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Intensity</label>
+                    <div className="grid grid-cols-5 gap-2 text-center text-xs">
+                      <span>Subtle</span>
+                      <span></span>
+                      <span>Medium</span>
+                      <span></span>
+                      <span>Strong</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      defaultValue="85"
+                      step="5"
+                      className="w-full" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Mood Notes (Optional)</label>
+                    <textarea 
+                      className="w-full h-20 p-2 border rounded-md bg-secondary resize-none"
+                      placeholder="What's influencing your mood today?"
+                    ></textarea>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={() => {
+                    toast({
+                      title: "Mood Updated",
+                      description: "Your team can now see your current mood state.",
+                    });
+                  }}>Save Mood</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
-        </div>
+        )}
         
         <div className="relative">
           <Input 
@@ -191,10 +343,76 @@ const TopBar: React.FC = () => {
                 M
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs bg-secondary/50 rounded-full px-2 py-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-              Add Team Member
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs bg-secondary/50 rounded-full px-2 py-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                  Add Team Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Invite Team Members</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email Addresses</label>
+                    <input 
+                      type="text" 
+                      placeholder="Enter email addresses separated by commas"
+                      className="w-full p-2 border rounded-md bg-secondary" 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Permission Level</label>
+                    <select className="w-full p-2 border rounded-md bg-secondary">
+                      <option value="editor">Editor (Can add and modify inspirations)</option>
+                      <option value="viewer">Viewer (Can only view)</option>
+                      <option value="admin">Admin (Full control including user management)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Add a Personal Message (Optional)</label>
+                    <textarea 
+                      className="w-full h-20 p-2 border rounded-md bg-secondary resize-none"
+                      placeholder="Write a personal message to the invitees"
+                    ></textarea>
+                  </div>
+                  
+                  <div className="border border-border p-3 rounded-md bg-secondary/30">
+                    <h4 className="text-sm font-medium mb-2">Or share this invite link</h4>
+                    <div className="flex">
+                      <input
+                        readOnly
+                        className="flex-1 p-2 text-xs bg-background rounded-l-md border border-border"
+                        value={`https://senseboard.design/invite/${projectId}?code=MTIzNDU2Nzg5`}
+                      />
+                      <Button variant="default" className="rounded-l-none" onClick={() => {
+                        toast({
+                          title: "Link Copied",
+                          description: "Invite link has been copied to clipboard",
+                        });
+                      }}>
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => {
+                    // Close dialog
+                  }}>Cancel</Button>
+                  <Button onClick={() => {
+                    toast({
+                      title: "Invitations Sent",
+                      description: "Team members will receive an email invitation shortly.",
+                    });
+                  }}>Send Invitations</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         ) : (
           <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white">
