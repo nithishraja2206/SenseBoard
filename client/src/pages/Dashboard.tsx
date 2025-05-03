@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Plus, Calendar, ArrowRight } from 'lucide-react';
 import { Project, MoodBoard, TeamMood } from '@shared/schema';
+import SimpleBreadcrumb from '@/components/ui/Breadcrumb';
 
 interface DashboardProps {
   projectId?: string;
@@ -162,233 +163,248 @@ const Dashboard: React.FC<DashboardProps> = ({ projectId }) => {
   };
   
   return (
-    <div className="container mx-auto p-6">
-      {!projectId ? (
-        <>
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-display font-bold text-foreground">Your Projects</h1>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Project
-            </Button>
-          </div>
-          
-          {isLoadingProjects ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="h-52 animate-pulse">
-                  <CardContent className="p-6 flex items-center justify-center h-full">
-                    <div className="w-full h-full bg-secondary rounded-md"></div>
-                  </CardContent>
-                </Card>
-              ))}
+    <div className="flex flex-col flex-1 overflow-hidden">
+      {/* Breadcrumb navigation */}
+      <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
+        <SimpleBreadcrumb 
+          items={!projectId ? 
+            [{ label: 'All Projects' }] : 
+            [
+              { label: 'All Projects', href: '/' },
+              { label: selectedProject?.name || `Project #${projectId}` }
+            ]
+          }
+        />
+      </div>
+      
+      <div className="container mx-auto p-6">
+        {!projectId ? (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-display font-bold text-foreground">Your Projects</h1>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Project
+              </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects?.map((project) => (
+            
+            {isLoadingProjects ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="h-52 animate-pulse">
+                    <CardContent className="p-6 flex items-center justify-center h-full">
+                      <div className="w-full h-full bg-secondary rounded-md"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects?.map((project) => (
+                  <Card 
+                    key={project.id} 
+                    className="hover:border-primary/50 transition-colors cursor-pointer card-glow"
+                    onClick={() => navigateToProject(project.id)}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-xl font-display">{project.name}</CardTitle>
+                      <CardDescription className="line-clamp-2">
+                        {project.description || 'No description'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {new Date(project.createdAt).toLocaleDateString()}
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" className="w-full">
+                        <span>Open Project</span>
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+                
                 <Card 
-                  key={project.id} 
-                  className="hover:border-primary/50 transition-colors cursor-pointer card-glow"
-                  onClick={() => navigateToProject(project.id)}
+                  className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center h-52"
+                  onClick={() => setIsCreateDialogOpen(true)}
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xl font-display">{project.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {project.description || 'No description'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {new Date(project.createdAt).toLocaleDateString()}
+                  <CardContent className="flex flex-col items-center justify-center p-6">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Plus className="h-6 w-6 text-primary" />
                     </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      <span>Open Project</span>
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-              
-              <Card 
-                className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center h-52"
-                onClick={() => setIsCreateDialogOpen(true)}
-              >
-                <CardContent className="flex flex-col items-center justify-center p-6">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Plus className="h-6 w-6 text-primary" />
-                  </div>
-                  <p className="text-center text-muted-foreground">Create a new project</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-display font-bold text-foreground">
-                {selectedProject?.name || 'Project Details'}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {selectedProject?.description || 'No description'}
-              </p>
-            </div>
-            <Button onClick={() => setIsCreateMoodBoardDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Mood Board
-            </Button>
-          </div>
-          
-          <h2 className="text-xl font-display font-semibold mb-4">Mood Boards</h2>
-          
-          {isLoadingMoodBoards ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2].map((i) => (
-                <Card key={i} className="h-40 animate-pulse">
-                  <CardContent className="p-6 flex items-center justify-center h-full">
-                    <div className="w-full h-full bg-secondary rounded-md"></div>
+                    <p className="text-center text-muted-foreground">Create a new project</p>
                   </CardContent>
                 </Card>
-              ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h1 className="text-3xl font-display font-bold text-foreground">
+                  {selectedProject?.name || 'Project Details'}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {selectedProject?.description || 'No description'}
+                </p>
+              </div>
+              <Button onClick={() => setIsCreateMoodBoardDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Mood Board
+              </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {moodBoards?.map((moodBoard) => (
+            
+            <h2 className="text-xl font-display font-semibold mb-4">Mood Boards</h2>
+            
+            {isLoadingMoodBoards ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2].map((i) => (
+                  <Card key={i} className="h-40 animate-pulse">
+                    <CardContent className="p-6 flex items-center justify-center h-full">
+                      <div className="w-full h-full bg-secondary rounded-md"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {moodBoards?.map((moodBoard) => (
+                  <Card 
+                    key={moodBoard.id} 
+                    className="hover:border-primary/50 transition-colors cursor-pointer card-glow"
+                    onClick={() => navigateToMoodBoard(moodBoard.id)}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-xl font-display">{moodBoard.name}</CardTitle>
+                      <CardDescription className="line-clamp-2">
+                        {moodBoard.description || 'No description'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                      <Button variant="outline" className="w-full">
+                        <span>Open Mood Board</span>
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+                
                 <Card 
-                  key={moodBoard.id} 
-                  className="hover:border-primary/50 transition-colors cursor-pointer card-glow"
-                  onClick={() => navigateToMoodBoard(moodBoard.id)}
+                  className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center h-40"
+                  onClick={() => setIsCreateMoodBoardDialogOpen(true)}
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xl font-display">{moodBoard.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {moodBoard.description || 'No description'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">
-                      <span>Open Mood Board</span>
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
+                  <CardContent className="flex flex-col items-center justify-center p-6">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Plus className="h-6 w-6 text-primary" />
+                    </div>
+                    <p className="text-center text-muted-foreground">Create a new mood board</p>
+                  </CardContent>
                 </Card>
-              ))}
-              
-              <Card 
-                className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center h-40"
-                onClick={() => setIsCreateMoodBoardDialogOpen(true)}
-              >
-                <CardContent className="flex flex-col items-center justify-center p-6">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Plus className="h-6 w-6 text-primary" />
-                  </div>
-                  <p className="text-center text-muted-foreground">Create a new mood board</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </>
-      )}
-      
-      {/* Create Project Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitProject)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Wellness App Redesign" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="A brief description of your project"
-                        className="resize-none min-h-24"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="submit" disabled={createProjectMutation.isPending}>
-                  {createProjectMutation.isPending ? 'Creating...' : 'Create Project'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Create Mood Board Dialog */}
-      <Dialog open={isCreateMoodBoardDialogOpen} onOpenChange={setIsCreateMoodBoardDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Mood Board</DialogTitle>
-          </DialogHeader>
-          <Form {...moodboardForm}>
-            <form onSubmit={moodboardForm.handleSubmit(onSubmitMoodBoard)} className="space-y-4">
-              <FormField
-                control={moodboardForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Visual Inspirations" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={moodboardForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="A brief description of this mood board"
-                        className="resize-none min-h-24"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="submit" disabled={createMoodBoardMutation.isPending}>
-                  {createMoodBoardMutation.isPending ? 'Creating...' : 'Create Mood Board'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+              </div>
+            )}
+          </>
+        )}
+        
+        {/* Create Project Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Project</DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmitProject)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Wellness App Redesign" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="A brief description of your project"
+                          className="resize-none min-h-24"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="submit" disabled={createProjectMutation.isPending}>
+                    {createProjectMutation.isPending ? 'Creating...' : 'Create Project'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Create Mood Board Dialog */}
+        <Dialog open={isCreateMoodBoardDialogOpen} onOpenChange={setIsCreateMoodBoardDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Mood Board</DialogTitle>
+            </DialogHeader>
+            <Form {...moodboardForm}>
+              <form onSubmit={moodboardForm.handleSubmit(onSubmitMoodBoard)} className="space-y-4">
+                <FormField
+                  control={moodboardForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Visual Inspirations" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={moodboardForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="A brief description of this mood board"
+                          className="resize-none min-h-24"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="submit" disabled={createMoodBoardMutation.isPending}>
+                    {createMoodBoardMutation.isPending ? 'Creating...' : 'Create Mood Board'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };
