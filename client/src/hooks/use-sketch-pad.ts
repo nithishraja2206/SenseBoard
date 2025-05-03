@@ -1,7 +1,68 @@
 import { useState, useRef, useEffect } from 'react';
-import * as fabricjs from 'fabric';
-const { Canvas, PencilBrush } = fabricjs;
 import { useToast } from '@/hooks/use-toast';
+
+// TypeScript namespace for fabric.js
+declare namespace fabric {
+  interface IObjectOptions {
+    selectable?: boolean;
+    hasControls?: boolean;
+    hasBorders?: boolean;
+    lockMovementX?: boolean;
+    lockMovementY?: boolean;
+    hoverCursor?: string;
+    [key: string]: any;
+  }
+  
+  interface ICanvasOptions {
+    isDrawingMode?: boolean;
+    selection?: boolean;
+    width?: number;
+    height?: number;
+    backgroundColor?: string;
+    renderOnAddRemove?: boolean;
+    skipTargetFind?: boolean;
+    fireRightClick?: boolean;
+    fireMiddleClick?: boolean;
+    stopContextMenu?: boolean;
+    [key: string]: any;
+  }
+  
+  interface FreeDrawingBrush {
+    color: string;
+    width: number;
+    shadow?: any;
+    strokeLineCap?: string;
+    strokeLineJoin?: string;
+  }
+  
+  interface Canvas {
+    isDrawingMode: boolean;
+    selection: boolean;
+    backgroundColor: string;
+    freeDrawingBrush: FreeDrawingBrush;
+    setWidth(width: number): void;
+    setHeight(height: number): void;
+    clear(): void;
+    renderAll(): void;
+    dispose(): void;
+    toJSON(propertiesToInclude?: string[]): any;
+    loadFromJSON(json: any, callback?: Function): void;
+    toSVG(options?: any): string;
+    toDataURL(options?: any): string;
+    on(event: string, handler: Function): void;
+    off(event: string, handler: Function): void;
+  }
+  
+  interface PencilBrush extends FreeDrawingBrush {}
+  
+  class PencilBrush {
+    constructor(canvas: Canvas);
+  }
+  
+  class Canvas {
+    constructor(element: HTMLCanvasElement, options?: ICanvasOptions);
+  }
+}
 
 type SketchPadMode = 'draw' | 'select' | 'erase';
 type SketchPadColor = string;
@@ -14,8 +75,11 @@ interface SketchPadState {
   canRedo: boolean;
 }
 
+// Global reference to the fabric module
+declare const fabric: any;
+
 export function useSketchPad() {
-  const [canvas, setCanvas] = useState<fabricjs.Canvas | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [state, setState] = useState<SketchPadState>({
     mode: 'draw',
     color: '#4FC3F7', // Calm color as default
@@ -33,7 +97,10 @@ export function useSketchPad() {
   
   // Initialize canvas
   const initCanvas = (canvasElement: HTMLCanvasElement, container: HTMLDivElement) => {
+    console.log("Initializing canvas...");
+    
     if (canvas) {
+      console.log("Disposing existing canvas");
       canvas.dispose();
     }
     
@@ -41,27 +108,63 @@ export function useSketchPad() {
     containerRef.current = container;
     
     // Set canvas dimensions explicitly
-    canvasElement.width = container.offsetWidth;
-    canvasElement.height = container.offsetHeight;
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    console.log(`Setting canvas dimensions: ${width}x${height}`);
+    
+    canvasElement.width = width;
+    canvasElement.height = height;
     
     try {
-      const fabricCanvas = new Canvas(canvasElement, {
+      // Make sure fabric is loaded
+      if (typeof fabric === 'undefined') {
+        console.error("Fabric.js is not loaded");
+        throw new Error("Fabric.js is not loaded");
+      }
+      
+      console.log("Creating FabricJS canvas instance");
+      // Create a new fabric.js canvas instance with fixed parameters
+      const fabricCanvas = new fabric.Canvas(canvasElement, {
         isDrawingMode: true,
-        width: container.offsetWidth,
-        height: container.offsetHeight,
+        width: width,
+        height: height,
         backgroundColor: 'rgba(30, 30, 30, 0.9)',
         renderOnAddRemove: true,
         selection: false,
+        fireRightClick: false,
+        fireMiddleClick: false,
+        stopContextMenu: true,
       });
       
       // Setup brush
-      const brush = new PencilBrush(fabricCanvas);
-      brush.color = state.color;
-      brush.width = state.brushSize;
-      fabricCanvas.freeDrawingBrush = brush;
+      console.log("Setting up brush");
+      if (!fabricCanvas.freeDrawingBrush) {
+        console.log("Creating new PencilBrush");
+        fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(fabricCanvas);
+      }
+      
+      fabricCanvas.freeDrawingBrush.color = state.color;
+      fabricCanvas.freeDrawingBrush.width = state.brushSize;
       
       // Save initial state to history
       saveToHistory(fabricCanvas);
+      
+      // Handle mouse events
+      console.log("Setting up mouse events");
+      fabricCanvas.on('mouse:down', function(options: any) {
+        console.log('Mouse down event fired');
+      });
+      
+      fabricCanvas.on('mouse:move', function(options: any) {
+        // Only log occasionally to avoid console spam
+        if (Math.random() < 0.01) { 
+          console.log('Mouse move event fired');
+        }
+      });
+      
+      fabricCanvas.on('path:created', function(options: any) {
+        console.log('Path created event fired');
+      });
       
       // Handle window resize
       const resizeCanvas = () => {
@@ -69,6 +172,7 @@ export function useSketchPad() {
           const width = containerRef.current.offsetWidth;
           const height = containerRef.current.offsetHeight;
           
+          console.log(`Resizing canvas to: ${width}x${height}`);
           fabricCanvas.setWidth(width);
           fabricCanvas.setHeight(height);
           canvasElement.width = width;
@@ -83,9 +187,12 @@ export function useSketchPad() {
       window.addEventListener('resize', resizeCanvas);
       
       // Set state and return cleanup
+      console.log("Canvas initialization complete");
       setCanvas(fabricCanvas);
       
+      // Return cleanup function
       return () => {
+        console.log("Running canvas cleanup");
         window.removeEventListener('resize', resizeCanvas);
         fabricCanvas.dispose();
         setCanvas(null);
@@ -102,7 +209,7 @@ export function useSketchPad() {
   };
   
   // Save current canvas state to history
-  const saveToHistory = (canvas: fabricjs.Canvas) => {
+  const saveToHistory = (canvas: fabric.Canvas) => {
     if (!canvas) return;
     
     const json = JSON.stringify(canvas.toJSON());
