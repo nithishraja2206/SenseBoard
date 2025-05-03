@@ -83,6 +83,22 @@ export class MemStorage implements IStorage {
   
   // Initialize sample data for demonstration
   private initSampleData() {
+    // Create sample user
+    const user1: User = {
+      id: this.userIdCounter++,
+      username: "designlead",
+      password: "password123",
+      name: "Alex Johnson",
+      email: "alex.johnson@example.com",
+      role: "Creative Director",
+      avatarUrl: null,
+      biography: "Experienced creative director with 8+ years in UX/UI design focused on wellness and travel applications.",
+      createdAt: new Date("2023-01-15"),
+      updatedAt: new Date("2023-01-15")
+    };
+    
+    this.users.set(user1.id, user1);
+    
     // Create sample projects
     const project1: Project = {
       id: this.projectIdCounter++,
@@ -537,7 +553,14 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const now = new Date();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      createdAt: now,
+      updatedAt: now,
+      avatarUrl: null,
+      biography: null
+    };
     this.users.set(id, user);
     return user;
   }

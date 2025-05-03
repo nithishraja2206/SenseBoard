@@ -10,6 +10,16 @@ import { CalendarDays, Clock, Mail, Users, Briefcase } from 'lucide-react';
 
 interface ProfileProps {}
 
+// Extended User type to match our mock data until we have a real API endpoint
+interface ExtendedUser extends User {
+  name: string;
+  email: string;
+  role: string;
+  avatarUrl: string | null;
+  biography: string;
+  createdAt: Date;
+}
+
 const Profile: React.FC<ProfileProps> = () => {
   // Fetch user profile data
   const { data: user, isLoading: isLoadingUser } = useQuery({
@@ -18,14 +28,16 @@ const Profile: React.FC<ProfileProps> = () => {
       // Simulated user data since we don't have a real endpoint
       return {
         id: 1,
-        username: 'Design Lead',
+        username: 'designlead',
+        password: 'password123', // This would not be included in a real API response
         name: 'Alex Johnson',
         email: 'alex.johnson@example.com',
         role: 'Creative Director',
         avatarUrl: null,
         biography: 'Experienced creative director with 8+ years in UX/UI design focused on wellness and travel applications.',
         createdAt: new Date('2023-01-15'),
-      } as User;
+        updatedAt: new Date('2023-01-15'),
+      } as ExtendedUser;
     },
   });
 
