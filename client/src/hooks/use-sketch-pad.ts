@@ -104,23 +104,27 @@ export function useSketchPad() {
     switch (mode) {
       case 'draw':
         canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush.color = state.color;
-        canvas.freeDrawingBrush.width = state.brushSize;
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.color = state.color;
+          canvas.freeDrawingBrush.width = state.brushSize;
+        }
         break;
       case 'select':
         canvas.isDrawingMode = false;
         break;
       case 'erase':
         canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush.color = 'rgba(30, 30, 30, 0.9)'; // Match background
-        canvas.freeDrawingBrush.width = state.brushSize * 2;
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.color = 'rgba(30, 30, 30, 0.9)'; // Match background
+          canvas.freeDrawingBrush.width = state.brushSize * 2;
+        }
         break;
     }
   };
   
   // Set brush color
   const setColor = (color: SketchPadColor) => {
-    if (!canvas) return;
+    if (!canvas || !canvas.freeDrawingBrush) return;
     
     setState(prev => ({ ...prev, color }));
     
@@ -131,7 +135,7 @@ export function useSketchPad() {
   
   // Set brush size
   const setBrushSize = (size: number) => {
-    if (!canvas) return;
+    if (!canvas || !canvas.freeDrawingBrush) return;
     
     setState(prev => ({ ...prev, brushSize: size }));
     
@@ -195,6 +199,7 @@ export function useSketchPad() {
     return canvas.toDataURL({
       format: 'png',
       quality: 0.8,
+      multiplier: 1.0
     });
   };
   
