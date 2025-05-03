@@ -14,10 +14,17 @@ const LinkCard: React.FC<LinkCardProps> = ({ node }) => {
     // Extract domain from URL if available
     if (node.contentUrl) {
       try {
-        const url = new URL(node.contentUrl);
+        // Try to parse the URL, check if it has protocol
+        let urlString = node.contentUrl;
+        if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
+          urlString = 'https://' + urlString;
+        }
+        
+        const url = new URL(urlString);
         setDomain(url.hostname.replace('www.', ''));
       } catch (error) {
         console.error("Invalid URL:", error);
+        // Fallback - just display the raw contentUrl
         setDomain(node.contentUrl);
       }
     }

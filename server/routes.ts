@@ -20,7 +20,8 @@ import {
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      const dir = path.join(process.cwd(), "dist/public/uploads");
+      // Store uploads directly in a public folder that's accessible via HTTP
+      const dir = path.join(process.cwd(), "public/uploads");
       
       // Create the directory if it doesn't exist
       if (!fs.existsSync(dir)) {

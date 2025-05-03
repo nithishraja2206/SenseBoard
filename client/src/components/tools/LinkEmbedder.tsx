@@ -59,7 +59,15 @@ const LinkEmbedder: React.FC<LinkEmbedderProps> = ({
     if (!url || !form.getValues('url')) return;
     
     try {
-      const urlObj = new URL(url);
+      // Add protocol if missing
+      let urlString = url;
+      if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
+        urlString = 'https://' + urlString;
+        // Update the form field with the corrected URL
+        form.setValue('url', urlString);
+      }
+      
+      const urlObj = new URL(urlString);
       const domain = urlObj.hostname.replace('www.', '');
       
       // If title is empty, suggest a title based on domain
@@ -73,6 +81,13 @@ const LinkEmbedder: React.FC<LinkEmbedderProps> = ({
       }
     } catch (error) {
       // Invalid URL, don't suggest anything
+      console.log("Error parsing URL:", error);
+      
+      // Show a validation message
+      form.setError('url', {
+        type: 'manual',
+        message: 'Please enter a valid URL (e.g., example.com or https://example.com)'
+      });
     }
   };
   
@@ -215,7 +230,20 @@ const LinkEmbedder: React.FC<LinkEmbedderProps> = ({
               <div className="ml-3">
                 <div className="text-sm font-medium">{form.watch('title') || 'Link Preview'}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  {form.watch('url') ? new URL(form.watch('url')).hostname.replace('www.', '') : 'example.com'}
+                  {(() => {
+                    try {
+                      // Try to get a domain from the URL
+                      const url = form.watch('url');
+                      if (url) {
+                        // Add protocol if needed for URL parsing
+                        const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`;
+                        return new URL(urlWithProtocol).hostname.replace('www.', '');
+                      }
+                      return 'example.com';
+                    } catch (e) {
+                      return 'example.com';
+                    }
+                  })()}
                 </div>
               </div>
             </div>
