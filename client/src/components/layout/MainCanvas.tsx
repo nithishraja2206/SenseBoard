@@ -103,9 +103,9 @@ const MainCanvas: React.FC<MainCanvasProps> = ({
           );
         })}
         
-        {/* Floating Add Button */}
+        {/* Floating Add Button - higher z-index to stay on top of inspiration cards */}
         <Button 
-          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 primary-gradient shadow-lg px-4 py-2 rounded-full text-white font-medium flex items-center"
+          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 primary-gradient shadow-lg px-4 py-2 rounded-full text-white font-medium flex items-center z-50"
           onClick={onAddInspiration}
         >
           <svg

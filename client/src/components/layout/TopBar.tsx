@@ -45,6 +45,22 @@ const TopBar: React.FC = () => {
     ? calculateTeamAura(moodSummary)
     : { dominantMood: 'energetic' as MoodType, alignment: 50, description: 'Team mood not set' };
   
+  // Extract mood board ID from location if available
+  const moodBoardIdMatch = location.match(/\/moodboard\/(\d+)/);
+  const moodBoardId = moodBoardIdMatch ? parseInt(moodBoardIdMatch[1]) : null;
+  
+  // Fetch mood boards for the current project
+  const { data: moodBoards } = useQuery({
+    queryKey: ['/api/projects', projectId, 'moodboards'],
+    queryFn: async () => {
+      if (!projectId) return [];
+      const res = await fetch(`/api/projects/${projectId}/moodboards`);
+      if (!res.ok) throw new Error('Failed to fetch mood boards');
+      return res.json();
+    },
+    enabled: !!projectId && !moodBoardId, // Only fetch if we're on a project page but not a moodboard page
+  });
+  
   // Handle new inspiration button click
   const handleNewInspiration = () => {
     if (!projectId) {
@@ -56,8 +72,21 @@ const TopBar: React.FC = () => {
       return;
     }
     
-    // Redirect to mood canvas with the current project
-    window.location.href = `/project/${projectId}?newInspiration=true`;
+    // If we're already on a mood board page, just add the parameter
+    if (moodBoardId) {
+      window.history.pushState({}, '', `${location}?newInspiration=true`);
+      window.dispatchEvent(new Event('popstate')); // Trigger a URL change event
+      return;
+    }
+    
+    // If we have mood boards for this project, redirect to the first one
+    if (moodBoards && moodBoards.length > 0) {
+      window.location.href = `/moodboard/${moodBoards[0].id}?newInspiration=true`;
+      return;
+    }
+    
+    // If no mood boards, go to project page
+    window.location.href = `/project/${projectId}`;
   };
   
   return (
@@ -149,20 +178,29 @@ const TopBar: React.FC = () => {
           <span>New Inspiration</span>
         </Button>
         
-        <div className="flex -space-x-2">
+        {projectId ? (
+          <div className="flex items-center">
+            <div className="flex -space-x-2 mr-2">
+              <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white">
+                A
+              </div>
+              <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white">
+                J
+              </div>
+              <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white">
+                M
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs bg-secondary/50 rounded-full px-2 py-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+              Add Team Member
+            </Button>
+          </div>
+        ) : (
           <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white">
-            U
+            A
           </div>
-          <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white">
-            T
-          </div>
-          <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white">
-            S
-          </div>
-          <div className="w-8 h-8 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-xs">
-            +3
-          </div>
-        </div>
+        )}
       </div>
     </header>
   );
