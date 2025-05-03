@@ -191,146 +191,168 @@ const TopBar: React.FC = () => {
       </div>
       
       <div className="flex items-center space-x-5">
-        {/* Current Mood Selector */}
-        {projectId && (
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground mr-1">Your Mood:</span>
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                if (projectId) {
-                  createTeamMoodMutation.mutate({
-                    projectId,
-                    mood: "calm",
-                    intensity: 85
-                  });
-                  toast({
-                    title: "Mood Updated",
-                    description: "You're feeling calm now.",
-                  });
-                }
-              }} 
-              className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--calm))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'calm' ? 'ring-2 ring-white' : ''}`} 
-              title="Calm"
-            />
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                if (projectId) {
-                  createTeamMoodMutation.mutate({
-                    projectId,
-                    mood: "energetic",
-                    intensity: 85
-                  });
-                  toast({
-                    title: "Mood Updated",
-                    description: "You're feeling energetic now.",
-                  });
-                }
-              }} 
-              className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--energetic))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'energetic' ? 'ring-2 ring-white' : ''}`} 
-              title="Energetic"
-            />
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                if (projectId) {
-                  createTeamMoodMutation.mutate({
-                    projectId,
-                    mood: "focused",
-                    intensity: 85
-                  });
-                  toast({
-                    title: "Mood Updated",
-                    description: "You're feeling focused now.",
-                  });
-                }
-              }} 
-              className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--focused))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'focused' ? 'ring-2 ring-white' : ''}`}
-              title="Focused"
-            />
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="ghost" className="w-5 h-5 p-0 rounded-full bg-surface flex items-center justify-center hover:bg-secondary" title="More mood options">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14" />
-                    <path d="M12 5v14" />
-                  </svg>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Set Your Current Mood</DialogTitle>
-                </DialogHeader>
-                <div className="grid grid-cols-3 gap-3 my-4">
-                  {["calm", "energetic", "focused", "playful", "serious"].map((mood) => (
-                    <Button 
-                      key={mood}
-                      variant="outline"
-                      onClick={() => {
-                        if (projectId) {
-                          createTeamMoodMutation.mutate({
-                            projectId,
-                            mood: mood as MoodType,
-                            intensity: 85
-                          });
-                        }
+        {/* Current Mood Selector - Always displayed */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-muted-foreground mr-1">Your Mood:</span>
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              if (projectId) {
+                createTeamMoodMutation.mutate({
+                  projectId,
+                  mood: "calm",
+                  intensity: 85
+                });
+                toast({
+                  title: "Mood Updated",
+                  description: "You're feeling calm now.",
+                });
+              } else {
+                toast({
+                  title: "Mood Set",
+                  description: "You're feeling calm now. This will apply to your next project.",
+                });
+              }
+            }} 
+            className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--calm))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'calm' ? 'ring-2 ring-white' : ''}`} 
+            title="Calm"
+          />
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              if (projectId) {
+                createTeamMoodMutation.mutate({
+                  projectId,
+                  mood: "energetic",
+                  intensity: 85
+                });
+                toast({
+                  title: "Mood Updated",
+                  description: "You're feeling energetic now.",
+                });
+              } else {
+                toast({
+                  title: "Mood Set",
+                  description: "You're feeling energetic now. This will apply to your next project.",
+                });
+              }
+            }} 
+            className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--energetic))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'energetic' ? 'ring-2 ring-white' : ''}`} 
+            title="Energetic"
+          />
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              if (projectId) {
+                createTeamMoodMutation.mutate({
+                  projectId,
+                  mood: "focused",
+                  intensity: 85
+                });
+                toast({
+                  title: "Mood Updated",
+                  description: "You're feeling focused now.",
+                });
+              } else {
+                toast({
+                  title: "Mood Set",
+                  description: "You're feeling focused now. This will apply to your next project.",
+                });
+              }
+            }} 
+            className={`w-5 h-5 p-0 rounded-full bg-[hsl(var(--focused))] hover:ring-2 hover:ring-white ${teamAura.dominantMood === 'focused' ? 'ring-2 ring-white' : ''}`}
+            title="Focused"
+          />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="w-5 h-5 p-0 rounded-full bg-surface flex items-center justify-center hover:bg-secondary" title="More mood options">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14" />
+                  <path d="M12 5v14" />
+                </svg>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Set Your Current Mood</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-3 gap-3 my-4">
+                {["calm", "energetic", "focused", "playful", "serious"].map((mood) => (
+                  <Button 
+                    key={mood}
+                    variant="outline"
+                    onClick={() => {
+                      if (projectId) {
+                        createTeamMoodMutation.mutate({
+                          projectId,
+                          mood: mood as MoodType,
+                          intensity: 85
+                        });
+                        toast({
+                          title: "Mood Updated",
+                          description: `You're feeling ${mood} now.`,
+                        });
+                      } else {
+                        toast({
+                          title: "Mood Set",
+                          description: `You're feeling ${mood} now. This will apply to your next project.`,
+                        });
+                      }
+                    }}
+                    className="flex flex-col items-center p-3 h-auto gap-2"
+                  >
+                    <div 
+                      className={`w-10 h-10 rounded-full`}
+                      style={{ 
+                        backgroundColor: mood === 'calm' ? 'hsl(var(--calm))' : 
+                                      mood === 'energetic' ? 'hsl(var(--energetic))' : 
+                                      mood === 'focused' ? 'hsl(var(--focused))' :
+                                      mood === 'playful' ? 'hsl(346, 84%, 61%)' :
+                                      'hsl(220, 9%, 46%)'
                       }}
-                      className="flex flex-col items-center p-3 h-auto gap-2"
-                    >
-                      <div 
-                        className={`w-10 h-10 rounded-full`}
-                        style={{ 
-                          backgroundColor: mood === 'calm' ? 'hsl(var(--calm))' : 
-                                        mood === 'energetic' ? 'hsl(var(--energetic))' : 
-                                        mood === 'focused' ? 'hsl(var(--focused))' :
-                                        mood === 'playful' ? 'hsl(346, 84%, 61%)' :
-                                        'hsl(220, 9%, 46%)'
-                        }}
-                      />
-                      <span className="capitalize">{mood}</span>
-                    </Button>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Intensity</label>
-                    <div className="grid grid-cols-5 gap-2 text-center text-xs">
-                      <span>Subtle</span>
-                      <span></span>
-                      <span>Medium</span>
-                      <span></span>
-                      <span>Strong</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="100" 
-                      defaultValue="85"
-                      step="5"
-                      className="w-full" 
                     />
+                    <span className="capitalize">{mood}</span>
+                  </Button>
+                ))}
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Intensity</label>
+                  <div className="grid grid-cols-5 gap-2 text-center text-xs">
+                    <span>Subtle</span>
+                    <span></span>
+                    <span>Medium</span>
+                    <span></span>
+                    <span>Strong</span>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Mood Notes (Optional)</label>
-                    <textarea 
-                      className="w-full h-20 p-2 border rounded-md bg-secondary resize-none"
-                      placeholder="What's influencing your mood today?"
-                    ></textarea>
-                  </div>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    defaultValue="85"
+                    step="5"
+                    className="w-full" 
+                  />
                 </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={() => {
-                    toast({
-                      title: "Mood Updated",
-                      description: "Your team can now see your current mood state.",
-                    });
-                  }}>Save Mood</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        )}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Mood Notes (Optional)</label>
+                  <textarea 
+                    className="w-full h-20 p-2 border rounded-md bg-secondary resize-none"
+                    placeholder="What's influencing your mood today?"
+                  ></textarea>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" onClick={() => {
+                  toast({
+                    title: "Mood Updated",
+                    description: "Your mood has been saved. This will be visible to your team.",
+                  });
+                }}>Save Mood</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         
         <div className="relative">
           <Input 
