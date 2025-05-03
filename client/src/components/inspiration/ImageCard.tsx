@@ -7,17 +7,23 @@ interface ImageCardProps {
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
-  // Get the image URL from the node
-  const imageUrl = node.contentUrl || 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=320&h=180';
+  // Get the image URL from the node and ensure it has the correct path
+  const imageUrl = node.contentUrl || '';
+  
+  // Properly form the URL by prefixing with the base URL if it's a relative path
+  const formattedImageUrl = imageUrl.startsWith('http') 
+    ? imageUrl 
+    : `${window.location.origin}${imageUrl}`;
 
   return (
     <div>
       <div className="relative">
         <img 
-          src={imageUrl} 
+          src={formattedImageUrl} 
           alt={node.title} 
           className="w-full h-40 object-cover"
           onError={(e) => {
+            console.error("Failed to load image:", formattedImageUrl);
             // Fallback to a gradient if image fails to load
             const target = e.target as HTMLImageElement;
             target.style.height = '140px';
