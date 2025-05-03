@@ -76,6 +76,187 @@ export class MemStorage implements IStorage {
     this.nodeIdCounter = 1;
     this.connectionIdCounter = 1;
     this.teamMoodIdCounter = 1;
+    
+    // Add sample data
+    this.initSampleData();
+  }
+  
+  // Initialize sample data for demonstration
+  private initSampleData() {
+    // Create sample projects
+    const project1: Project = {
+      id: this.projectIdCounter++,
+      name: "Wellness App Redesign",
+      description: "A complete redesign of the meditation and wellness app focusing on a more intuitive and calming user experience.",
+      coverImageUrl: "",
+      createdAt: new Date("2023-09-15"),
+      updatedAt: new Date("2023-09-15")
+    };
+    
+    const project2: Project = {
+      id: this.projectIdCounter++,
+      name: "Travel Platform",
+      description: "Concept design for a next-generation travel booking platform with immersive experience previews.",
+      coverImageUrl: "",
+      createdAt: new Date("2023-10-05"),
+      updatedAt: new Date("2023-10-05")
+    };
+    
+    const project3: Project = {
+      id: this.projectIdCounter++,
+      name: "Smart Home Dashboard",
+      description: "A central hub interface for controlling all connected home devices with ambient awareness features.",
+      coverImageUrl: "",
+      createdAt: new Date("2023-11-20"),
+      updatedAt: new Date("2023-11-20")
+    };
+    
+    this.projects.set(project1.id, project1);
+    this.projects.set(project2.id, project2);
+    this.projects.set(project3.id, project3);
+    
+    // Create sample mood boards
+    const moodBoard1: MoodBoard = {
+      id: this.moodBoardIdCounter++,
+      projectId: project1.id,
+      name: "Visual Inspirations",
+      description: "Color schemes, typography, and visual elements for the wellness app redesign",
+      createdAt: new Date("2023-09-16"),
+      updatedAt: new Date("2023-09-16")
+    };
+    
+    const moodBoard2: MoodBoard = {
+      id: this.moodBoardIdCounter++,
+      projectId: project1.id,
+      name: "User Flow Concepts",
+      description: "Different approaches to the user journey and navigation patterns",
+      createdAt: new Date("2023-09-18"),
+      updatedAt: new Date("2023-09-18")
+    };
+    
+    const moodBoard3: MoodBoard = {
+      id: this.moodBoardIdCounter++,
+      projectId: project2.id,
+      name: "Destination Experiences",
+      description: "Visual and sensory inspirations for how destinations should be presented",
+      createdAt: new Date("2023-10-10"),
+      updatedAt: new Date("2023-10-10")
+    };
+    
+    this.moodBoards.set(moodBoard1.id, moodBoard1);
+    this.moodBoards.set(moodBoard2.id, moodBoard2);
+    this.moodBoards.set(moodBoard3.id, moodBoard3);
+    
+    // Create some sample nodes for the first mood board
+    const node1: InspirationNode = {
+      id: this.nodeIdCounter++,
+      moodBoardId: moodBoard1.id,
+      type: "image",
+      title: "Color Palette Inspiration",
+      description: "Soft blues and purples for calming effect",
+      content: JSON.stringify({
+        imageUrl: "https://via.placeholder.com/300x200/7B68EE/FFFFFF?text=Color+Palette"
+      }),
+      positionX: 100,
+      positionY: 150,
+      width: 320,
+      height: 240,
+      zIndex: 1,
+      mood: "calm",
+      intensity: 70,
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const node2: InspirationNode = {
+      id: this.nodeIdCounter++,
+      moodBoardId: moodBoard1.id,
+      type: "thought",
+      title: "User Experience Goal",
+      description: "The app should feel like a natural extension of the user's mental state - responding to their needs before they even realize what they need.",
+      content: JSON.stringify({
+        source: "Team brainstorming",
+        date: "2023-09-17"
+      }),
+      positionX: 450,
+      positionY: 200,
+      width: 320,
+      height: 200,
+      zIndex: 1,
+      mood: "focused",
+      intensity: 85,
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const node3: InspirationNode = {
+      id: this.nodeIdCounter++,
+      moodBoardId: moodBoard1.id,
+      type: "sketch",
+      title: "Navigation Concept",
+      description: "Fluid, gesture-based navigation that feels intuitive and responsive",
+      content: JSON.stringify({
+        paths: "<svg>...</svg>" // Simplified for example
+      }),
+      positionX: 200,
+      positionY: 400,
+      width: 350,
+      height: 300,
+      zIndex: 1,
+      mood: "energetic",
+      intensity: 60,
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.inspirationNodes.set(node1.id, node1);
+    this.inspirationNodes.set(node2.id, node2);
+    this.inspirationNodes.set(node3.id, node3);
+    
+    // Create some connections between nodes
+    const connection1: NodeConnection = {
+      id: this.connectionIdCounter++,
+      sourceNodeId: node1.id,
+      targetNodeId: node2.id,
+      strength: 75,
+      createdAt: new Date()
+    };
+    
+    const connection2: NodeConnection = {
+      id: this.connectionIdCounter++,
+      sourceNodeId: node2.id,
+      targetNodeId: node3.id,
+      strength: 90,
+      createdAt: new Date()
+    };
+    
+    this.nodeConnections.set(connection1.id, connection1);
+    this.nodeConnections.set(connection2.id, connection2);
+    
+    // Add some team moods
+    const mood1: TeamMood = {
+      id: this.teamMoodIdCounter++,
+      projectId: project1.id,
+      userId: 1, // Default user
+      mood: "calm",
+      intensity: 80,
+      createdAt: new Date()
+    };
+    
+    const mood2: TeamMood = {
+      id: this.teamMoodIdCounter++,
+      projectId: project1.id,
+      userId: 2, // Another user
+      mood: "focused",
+      intensity: 90,
+      createdAt: new Date()
+    };
+    
+    this.teamMoods.set(mood1.id, mood1);
+    this.teamMoods.set(mood2.id, mood2);
   }
   
   // User methods
