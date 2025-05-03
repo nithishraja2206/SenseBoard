@@ -279,13 +279,22 @@ const InspirationCard: React.FC<InspirationCardProps> = ({
                 <div className="flex flex-col gap-2">
                   <SimpleImageUploader 
                     onImageUploaded={(imageUrl: string) => {
+                      // Update form state with the new URL
                       updateNodeMutation.mutate({
+                        title,
+                        description,
+                        mood: selectedMood,
+                        intensity: intensityValue,
                         contentUrl: imageUrl,
                       });
                       toast({
                         title: 'Image Updated',
                         description: 'The image has been updated successfully.',
                       });
+                      // Close the dialog after successful update
+                      setTimeout(() => {
+                        setIsEditDialogOpen(false);
+                      }, 1000);
                     }}
                   />
                   {node.contentUrl && (
