@@ -12,8 +12,12 @@ const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   const [imageError, setImageError] = useState<boolean>(false);
   
-  // Parse content for backward compatibility
+  // Parse content for backward compatibility and reset state when node changes
   useEffect(() => {
+    // Reset states when node changes to ensure image refreshes
+    setImageLoaded(false);
+    setImageError(false);
+    
     try {
       console.log("Node data:", node);
       
@@ -27,9 +31,11 @@ const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
           console.log("Using external URL:", node.contentUrl);
         } else {
           // For relative paths like /uploads/..., make sure they're proper
-          const fullUrl = `${window.location.origin}${node.contentUrl}`;
+          // Add cache-busting timestamp to ensure the image is always refreshed
+          const timestamp = new Date().getTime();
+          const fullUrl = `${window.location.origin}${node.contentUrl}?t=${timestamp}`;
           setImageUrl(fullUrl);
-          console.log("Using local URL:", fullUrl);
+          console.log("Using local URL with cache-busting:", fullUrl);
         }
       } 
       // Fallback to checking content (old format)
@@ -37,8 +43,11 @@ const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
         try {
           const contentObj = JSON.parse(node.content);
           if (contentObj && contentObj.imageUrl) {
-            setImageUrl(contentObj.imageUrl);
-            console.log("Using imageUrl from content:", contentObj.imageUrl);
+            // Add cache-busting timestamp
+            const timestamp = new Date().getTime();
+            const imageUrlWithTimestamp = `${contentObj.imageUrl}?t=${timestamp}`;
+            setImageUrl(imageUrlWithTimestamp);
+            console.log("Using imageUrl from content with cache-busting:", imageUrlWithTimestamp);
           }
         } catch (e) {
           console.error("Error parsing content JSON:", e);
@@ -48,7 +57,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
       console.error("Error processing image URL:", error);
       setImageError(true);
     }
-  }, [node]);
+  }, [node.contentUrl, node.content, node.title, node.description, node.mood]);
 
   // Test if the image URL works by preloading it
   useEffect(() => {

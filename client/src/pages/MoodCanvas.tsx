@@ -110,20 +110,34 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
   const { data: nodes = [], isLoading: isLoadingNodes } = useQuery({
     queryKey: ['/api/moodboards', moodBoardId, 'nodes'],
     queryFn: async () => {
+      console.log('Fetching nodes from server for moodboard:', moodBoardId);
       const res = await fetch(`/api/moodboards/${moodBoardId}/nodes`);
       if (!res.ok) throw new Error('Failed to fetch nodes');
-      return res.json() as Promise<InspirationNode[]>;
+      const data = await res.json() as InspirationNode[];
+      console.log('Node data fetched:', data);
+      return data;
     },
+    // Make the query more reactive to changes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 3000, // Refetch every 3 seconds while the component is visible
   });
   
   // Fetch node connections
   const { data: connections = [], isLoading: isLoadingConnections } = useQuery({
     queryKey: ['/api/moodboards', moodBoardId, 'connections'],
     queryFn: async () => {
+      console.log('Fetching connections for moodboard:', moodBoardId);
       const res = await fetch(`/api/moodboards/${moodBoardId}/connections`);
       if (!res.ok) throw new Error('Failed to fetch connections');
-      return res.json() as Promise<NodeConnection[]>;
+      const data = await res.json() as NodeConnection[];
+      console.log('Connection data fetched:', data);
+      return data;
     },
+    // Make the query more reactive to changes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 3000, // Refetch every 3 seconds while the component is visible
   });
   
   // Fetch team mood summary
@@ -131,11 +145,18 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
     queryKey: ['/api/projects', moodBoard?.projectId, 'mood-summary'],
     queryFn: async () => {
       if (!moodBoard?.projectId) return {};
+      console.log('Fetching mood summary for project:', moodBoard.projectId);
       const res = await fetch(`/api/projects/${moodBoard.projectId}/mood-summary`);
       if (!res.ok) throw new Error('Failed to fetch mood summary');
-      return res.json();
+      const data = await res.json();
+      console.log('Mood summary data fetched:', data);
+      return data;
     },
     enabled: !!moodBoard?.projectId,
+    // Make the query more reactive to changes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 3000, // Refetch every 3 seconds while the component is visible
   });
   
   // Calculate team aura based on mood summary
