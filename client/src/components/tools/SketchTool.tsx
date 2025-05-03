@@ -69,23 +69,26 @@ const SketchTool: React.FC<SketchToolProps> = ({
   
   // Initialize canvas when component mounts
   useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    
     if (isOpen && containerRef.current && canvasRef.current) {
       // Small delay to ensure the DOM is fully rendered
       const timer = setTimeout(() => {
-        const cleanup = initCanvas(canvasRef.current!, containerRef.current!);
+        cleanup = initCanvas(canvasRef.current!, containerRef.current!);
         
-        // Set initial color and brush size
-        setColor(state.color);
-        setBrushSize(state.brushSize);
-        
-        return cleanup;
+        // Set initial color and brush size after a slight delay
+        setTimeout(() => {
+          setColor(state.color);
+          setBrushSize(state.brushSize);
+        }, 50);
       }, 100);
       
       return () => {
         clearTimeout(timer);
+        if (cleanup) cleanup();
       };
     }
-  }, [isOpen, initCanvas, state.color, state.brushSize]);
+  }, [isOpen, initCanvas]);
   
   // Handle color selection
   const handleColorChange = (color: string) => {
@@ -108,7 +111,7 @@ const SketchTool: React.FC<SketchToolProps> = ({
       const svgContent = exportAsSVG();
       
       // Create node with the SVG content
-      const response = await apiRequest<{id: number}>("POST", "/api/nodes", {
+      const response = await apiRequest("POST", "/api/nodes", {
         moodBoardId,
         type: "sketch",
         title: values.title,
@@ -127,8 +130,8 @@ const SketchTool: React.FC<SketchToolProps> = ({
       });
       
       // Call the callback if provided
-      if (onSketchCreated && response && response.id) {
-        onSketchCreated(response.id);
+      if (onSketchCreated && response && 'id' in response) {
+        onSketchCreated(response.id as number);
       }
       
       onClose();
