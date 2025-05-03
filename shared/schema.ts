@@ -2,16 +2,26 @@ import { pgTable, text, serial, integer, timestamp, jsonb, varchar } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User schema from the original file
+// User schema with extended profile fields
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  name: text("name"),
+  email: text("email"),
+  role: text("role"),
+  avatarUrl: text("avatar_url"),
+  biography: text("biography"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  name: true,
+  email: true,
+  role: true,
 });
 
 // Mood types for the application
