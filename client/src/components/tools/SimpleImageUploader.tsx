@@ -73,20 +73,34 @@ const SimpleImageUploader: React.FC<SimpleImageUploaderProps> = ({
     }
   };
   
+  // Create a reference to the file input element
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  
+  // Function to trigger file input click
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
   return (
     <div className="flex items-center gap-2">
-      <label className="cursor-pointer">
-        <Button variant="outline" type="button" disabled={isUploading}>
-          <Upload className="h-4 w-4 mr-2" />
-          {isUploading ? 'Uploading...' : 'Upload New Image'}
-        </Button>
-        <input 
-          type="file" 
-          className="hidden" 
-          accept="image/*" 
-          onChange={handleFileChange}
-        />
-      </label>
+      <Button 
+        variant="outline" 
+        type="button" 
+        disabled={isUploading}
+        onClick={handleButtonClick}
+      >
+        <Upload className="h-4 w-4 mr-2" />
+        {isUploading ? 'Uploading...' : 'Upload New Image'}
+      </Button>
+      <input 
+        ref={fileInputRef}
+        type="file" 
+        className="hidden" 
+        accept="image/*" 
+        onChange={handleFileChange}
+      />
     </div>
   );
 };

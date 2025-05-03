@@ -179,10 +179,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Validate node type
       const nodeSchema = insertInspirationNodeSchema.refine(
-        data => nodeTypes.includes(data.type as any),
+        data => (nodeTypes as readonly string[]).includes(data.type as string),
         { message: "Invalid node type", path: ["type"] }
       ).refine(
-        data => moodTypes.includes(data.mood as any),
+        data => (moodTypes as readonly string[]).includes(data.mood as string),
         { message: "Invalid mood type", path: ["mood"] }
       );
       
@@ -221,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         width: z.number().optional(),
         height: z.number().optional(),
         zIndex: z.number().optional(),
-        mood: z.enum(moodTypes as [string, ...string[]]).optional(),
+        mood: z.enum(moodTypes as unknown as [string, ...string[]]).optional(),
         intensity: z.number().min(0).max(100).optional(),
         tags: z.array(z.string()).optional(),
       });
@@ -371,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/moods", async (req: Request, res: Response) => {
     try {
       const moodSchema = insertTeamMoodSchema.refine(
-        data => moodTypes.includes(data.mood as any),
+        data => (moodTypes as readonly string[]).includes(data.mood as string),
         { message: "Invalid mood type", path: ["mood"] }
       );
       
