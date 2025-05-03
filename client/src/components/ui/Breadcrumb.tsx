@@ -2,14 +2,14 @@ import React from "react";
 import { Link } from "wouter";
 import { ChevronRight, Home } from "lucide-react";
 
-interface BreadcrumbProps {
+interface SimpleBreadcrumbProps {
   items: Array<{
     label: string;
     href?: string;
   }>;
 }
 
-const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+const SimpleBreadcrumb: React.FC<SimpleBreadcrumbProps> = ({ items }) => {
   return (
     <nav className="flex items-center space-x-2 text-sm">
       <Link href="/">
@@ -36,4 +36,4 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
   );
 };
 
-export default Breadcrumb;
+export default SimpleBreadcrumb;

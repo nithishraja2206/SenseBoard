@@ -15,7 +15,7 @@ import ImageUploader from '@/components/tools/ImageUploader';
 import AudioRecorder from '@/components/tools/AudioRecorder';
 import ThoughtEditor from '@/components/tools/ThoughtEditor';
 import LinkEmbedder from '@/components/tools/LinkEmbedder';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import SimpleBreadcrumb from '@/components/ui/Breadcrumb';
 
 interface MoodCanvasProps {
   moodBoardId: string;
@@ -227,7 +227,7 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
       {/* Breadcrumb navigation */}
       {moodBoard && (
         <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
-          <Breadcrumb 
+          <SimpleBreadcrumb 
             items={[
               { label: moodBoard.projectId ? `Project: ${project?.name || `Project #${moodBoard.projectId}`}` : 'Project', href: `/project/${moodBoard.projectId}` },
               { label: `Mood Board: ${moodBoard.name}` }
