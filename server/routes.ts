@@ -254,8 +254,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       const response: { [key: string]: string } = {};
       
+      console.log("Files received:", files);
+
       if (files.image && files.image[0]) {
-        const imagePath = `/uploads/${path.basename(files.image[0].path)}`;
+        console.log("Image file:", files.image[0]);
+        const uploadedFile = files.image[0];
+        const fileName = path.basename(uploadedFile.path);
+        const imagePath = `/uploads/${fileName}`;
+        
+        console.log("File saved to:", uploadedFile.path);
+        console.log("File accessible at:", imagePath);
+        
         response.imageUrl = imagePath;
       }
       
@@ -264,8 +273,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         response.audioUrl = audioPath;
       }
       
+      console.log("Sending response:", response);
       res.json(response);
     } catch (error) {
+      console.error("Error uploading file:", error);
       res.status(500).json({ message: "Failed to upload file" });
     }
   });
