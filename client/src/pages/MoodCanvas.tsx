@@ -234,16 +234,37 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
   
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Breadcrumb navigation */}
-      {moodBoard && (
-        <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
-          <div className="flex justify-between items-center">
-            <SimpleBreadcrumb 
-              items={[
-                { label: project?.name || `Project #${moodBoard.projectId}`, href: `/project/${moodBoard.projectId}` },
-                { label: moodBoard.name }
-              ]}
-            />
+      {/* Global navigation bar */}
+      {moodBoard && project && (
+        <div className="bg-background/80 backdrop-blur-sm border-b border-border px-6 py-3 z-10 sticky top-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="flex items-center mr-6">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" 
+                     style={{ 
+                       background: `linear-gradient(45deg, hsl(var(--${Object.keys(moodSummary)[0] || 'primary'})), hsl(var(--${Object.keys(moodSummary)[1] || 'focused'})))`,
+                       opacity: 0.9
+                     }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg>
+                </div>
+                <div>
+                  <h2 className="text-sm font-medium leading-none">{project.name}</h2>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Project Mood: {Object.keys(moodSummary).slice(0, 2).map(mood => 
+                      mood.charAt(0).toUpperCase() + mood.slice(1)
+                    ).join(' + ')}
+                  </p>
+                </div>
+              </div>
+              
+              <SimpleBreadcrumb 
+                items={[
+                  { label: project.name, href: `/project/${moodBoard.projectId}` },
+                  { label: moodBoard.name }
+                ]}
+              />
+            </div>
+            
             <div className="flex items-center">
               <div className="flex -space-x-3 mr-3">
                 <div className="w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-white font-medium shadow-md cursor-pointer hover:scale-110 transition-transform" style={{ backgroundColor: "hsl(var(--primary))" }}>
