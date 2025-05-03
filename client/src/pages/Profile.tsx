@@ -25,19 +25,12 @@ const Profile: React.FC<ProfileProps> = () => {
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ['/api/users', 1], // Hardcoded user ID for demo
     queryFn: async () => {
-      // Simulated user data since we don't have a real endpoint
-      return {
-        id: 1,
-        username: 'designlead',
-        password: 'password123', // This would not be included in a real API response
-        name: 'Alex Johnson',
-        email: 'alex.johnson@example.com',
-        role: 'Creative Director',
-        avatarUrl: null,
-        biography: 'Experienced creative director with 8+ years in UX/UI design focused on wellness and travel applications.',
-        createdAt: new Date('2023-01-15'),
-        updatedAt: new Date('2023-01-15'),
-      } as ExtendedUser;
+      const res = await fetch(`/api/users/1`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const userData = await res.json();
+      return userData as ExtendedUser;
     },
   });
 
@@ -140,7 +133,7 @@ const Profile: React.FC<ProfileProps> = () => {
                 ) : (
                   projects.map(project => (
                     <Link key={project.id} href={`/project/${project.id}`}>
-                      <a className="block group">
+                      <div className="block group cursor-pointer">
                         <div className="flex items-center p-3 rounded-lg border hover:bg-accent/50 transition-colors">
                           <div className="flex-1">
                             <h3 className="font-medium group-hover:text-primary transition-colors">{project.name}</h3>
@@ -162,7 +155,7 @@ const Profile: React.FC<ProfileProps> = () => {
                             </div>
                           </div>
                         </div>
-                      </a>
+                      </div>
                     </Link>
                   ))
                 )}
