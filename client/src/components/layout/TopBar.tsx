@@ -171,8 +171,25 @@ const TopBar: React.FC = () => {
         
         {project && (
           <div className="flex items-center space-x-2 ml-8">
-            <span className="text-sm text-muted-foreground">Project:</span>
-            <span className="font-medium">{project.name}</span>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2" 
+                 style={{ 
+                   background: moodSummary ? `linear-gradient(45deg, 
+                     hsl(var(--${Object.keys(moodSummary)[0] || 'primary'})), 
+                     hsl(var(--${Object.keys(moodSummary)[1] || 'focused'})))` : 'hsl(var(--primary))',
+                   opacity: 0.9
+                 }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <div>
+              <span className="font-medium">{project.name}</span>
+              {moodSummary && Object.keys(moodSummary).length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {Object.keys(moodSummary).slice(0, 2).map(mood => 
+                    mood.charAt(0).toUpperCase() + mood.slice(1)
+                  ).join(' + ')}
+                </p>
+              )}
+            </div>
           </div>
         )}
         
