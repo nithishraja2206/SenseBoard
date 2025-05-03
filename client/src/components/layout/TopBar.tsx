@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+import { useLocation, Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { calculateTeamAura } from '@/lib/mood-utils';
+import { MoodType } from '@shared/schema';
+import { TeamAuraData } from '@/types';
+
+const TopBar: React.FC = () => {
+  const [location] = useLocation();
+  const { toast } = useToast();
+  
+  // Extract project ID from location if available
+  const projectIdMatch = location.match(/\/project\/(\d+)/);
+  const projectId = projectIdMatch ? parseInt(projectIdMatch[1]) : null;
+  
+  // Fetch project data if we have a project ID
+  const { data: project } = useQuery({
+    queryKey: ['/api/projects', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const res = await fetch(`/api/projects/${projectId}`);
+      if (!res.ok) throw new Error('Failed to fetch project');
+      return res.json();
+    },
+    enabled: !!projectId,
+  });
+  
+  // Fetch team mood summary if we have a project ID
+  const { data: moodSummary } = useQuery({
+    queryKey: ['/api/projects', projectId, 'mood-summary'],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const res = await fetch(`/api/projects/${projectId}/mood-summary`);
+      if (!res.ok) throw new Error('Failed to fetch mood summary');
+      return res.json();
+    },
+    enabled: !!projectId,
+  });
+  
+  // Calculate team aura from mood summary
+  const teamAura: TeamAuraData = moodSummary 
+    ? calculateTeamAura(moodSummary)
+    : { dominantMood: 'energetic' as MoodType, alignment: 50, description: 'Team mood not set' };
+  
+  // Handle new inspiration button click
+  const handleNewInspiration = () => {
+    if (!projectId) {
+      toast({
+        title: "No Project Selected",
+        description: "Please select a project first to add inspiration.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Redirect to mood canvas with the current project
+    window.location.href = `/project/${projectId}?newInspiration=true`;
+  };
+  
+  return (
+    <header className="glass-panel border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+      <div className="flex items-center space-x-6">
+        <Link href="/">
+          <h1 className="font-display text-xl font-bold bg-clip-text text-transparent primary-gradient cursor-pointer">
+            SenseBoard
+          </h1>
+        </Link>
+        
+        {project && (
+          <div className="flex items-center space-x-2 ml-8">
+            <span className="text-sm text-muted-foreground">Project:</span>
+            <span className="font-medium">{project.name}</span>
+          </div>
+        )}
+        
+        {/* Live emotion tracker */}
+        {projectId && (
+          <div className="flex items-center px-3 py-1.5 rounded-full bg-secondary ml-6">
+            <div 
+              className={`w-4 h-4 rounded-full animate-pulse mr-2`}
+              style={{ backgroundColor: teamAura.dominantMood === 'calm' ? 'hsl(var(--calm))' : 
+                       teamAura.dominantMood === 'energetic' ? 'hsl(var(--energetic))' : 
+                       'hsl(var(--focused))' }}
+            />
+            <span className="text-sm">{teamAura.dominantMood.charAt(0).toUpperCase() + teamAura.dominantMood.slice(1)}</span>
+          </div>
+        )}
+      </div>
+      
+      <div className="flex items-center space-x-5">
+        {/* Mood palette selector */}
+        <div className="flex items-center space-x-2">
+          <div className="w-5 h-5 rounded-full bg-[hsl(var(--calm))] cursor-pointer" title="Calm"></div>
+          <div className="w-5 h-5 rounded-full bg-[hsl(var(--energetic))] cursor-pointer" title="Energetic"></div>
+          <div className="w-5 h-5 rounded-full bg-[hsl(var(--focused))] cursor-pointer" title="Focused"></div>
+          <div className="w-5 h-5 rounded-full bg-surface flex items-center justify-center cursor-pointer" title="Add mood">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" />
+              <path d="M12 5v14" />
+            </svg>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <Input 
+            type="text" 
+            placeholder="Search inspirations..." 
+            className="bg-secondary text-sm rounded-lg py-2 pl-9 pr-4 w-52"
+          />
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="absolute left-3 top-3 text-muted-foreground"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </div>
+        
+        <Button 
+          className="flex items-center space-x-1 primary-gradient px-3 py-1.5 rounded-lg text-sm font-medium"
+          onClick={handleNewInspiration}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="mr-1"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+          <span>New Inspiration</span>
+        </Button>
+        
+        <div className="flex -space-x-2">
+          <div className="w-8 h-8 rounded-full border-2 border-background bg-primary flex items-center justify-center text-white">
+            U
+          </div>
+          <div className="w-8 h-8 rounded-full border-2 border-background bg-focused flex items-center justify-center text-white">
+            T
+          </div>
+          <div className="w-8 h-8 rounded-full border-2 border-background bg-energetic flex items-center justify-center text-white">
+            S
+          </div>
+          <div className="w-8 h-8 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-xs">
+            +3
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default TopBar;
