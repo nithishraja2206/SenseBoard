@@ -2,13 +2,44 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Set up uploads directories
+const publicDir = path.join(process.cwd(), "public");
+const uploadsDir = path.join(publicDir, "uploads");
+
+// Ensure directories exist
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+console.log("Serving static files from:", publicDir);
+
+// Explicitly serve uploads with proper content type
+app.get('/uploads/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadsDir, filename);
+  
+  console.log("Attempting to serve file:", filePath);
+  
+  if (fs.existsSync(filePath)) {
+    console.log("File exists, serving:", filePath);
+    res.sendFile(filePath);
+  } else {
+    console.log("File not found:", filePath);
+    res.status(404).send('File not found');
+  }
+});
+
 // Serve static files from public folder
-app.use(express.static(path.join(process.cwd(), "public")));
+app.use(express.static(publicDir));
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -20,20 +20,31 @@ import {
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      // Store uploads directly in a public folder that's accessible via HTTP
-      const dir = path.join(process.cwd(), "public/uploads");
+      // Create multiple paths to ensure the uploads are accessible
+      const dirs = [
+        path.join(process.cwd(), "public/uploads"),
+        path.join(process.cwd(), "dist/public/uploads")
+      ];
       
-      // Create the directory if it doesn't exist
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
+      // Create the directories if they don't exist
+      dirs.forEach(dir => {
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+      });
       
-      cb(null, dir);
+      // Store files in the public root directory
+      cb(null, dirs[0]);
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       const ext = path.extname(file.originalname);
-      cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+      const filename = file.fieldname + "-" + uniqueSuffix + ext;
+      
+      // Log the filename being created
+      console.log("Creating file:", filename);
+      
+      cb(null, filename);
     },
   }),
   limits: {

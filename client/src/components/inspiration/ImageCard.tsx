@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { InspirationNode } from '@shared/schema';
 import MoodBadge from '@/components/ui/MoodBadge';
+import { Image as ImageIcon } from 'lucide-react';
 
 interface ImageCardProps {
   node: InspirationNode;
@@ -8,57 +9,88 @@ interface ImageCardProps {
 
 const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<boolean>(false);
   
   // Parse content for backward compatibility
   useEffect(() => {
     try {
+      console.log("Node data:", node);
+      
       // Try to get image URL from contentUrl first (new format)
       if (node.contentUrl) {
+        console.log("Node has contentUrl:", node.contentUrl);
+        
         // Handle different URL formats
         if (node.contentUrl.startsWith('http')) {
           setImageUrl(node.contentUrl);
+          console.log("Using external URL:", node.contentUrl);
         } else {
           // For relative paths like /uploads/..., make sure they're proper
-          setImageUrl(`${window.location.origin}${node.contentUrl}`);
+          const fullUrl = `${window.location.origin}${node.contentUrl}`;
+          setImageUrl(fullUrl);
+          console.log("Using local URL:", fullUrl);
         }
       } 
       // Fallback to checking content (old format)
       else if (node.content) {
-        const contentObj = JSON.parse(node.content);
-        if (contentObj && contentObj.imageUrl) {
-          setImageUrl(contentObj.imageUrl);
+        try {
+          const contentObj = JSON.parse(node.content);
+          if (contentObj && contentObj.imageUrl) {
+            setImageUrl(contentObj.imageUrl);
+            console.log("Using imageUrl from content:", contentObj.imageUrl);
+          }
+        } catch (e) {
+          console.error("Error parsing content JSON:", e);
         }
       }
     } catch (error) {
-      console.error("Error parsing image URL:", error);
+      console.error("Error processing image URL:", error);
+      setImageError(true);
     }
   }, [node]);
+
+  // Test if the image URL works by preloading it
+  useEffect(() => {
+    if (!imageUrl) {
+      setImageError(true);
+      return;
+    }
+    
+    const img = new Image();
+    img.onload = () => {
+      console.log("Image loaded successfully:", imageUrl);
+      setImageLoaded(true);
+      setImageError(false);
+    };
+    img.onerror = () => {
+      console.error("Failed to load image:", imageUrl);
+      setImageError(true);
+      setImageLoaded(false);
+    };
+    img.src = imageUrl;
+    
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [imageUrl]);
 
   return (
     <div>
       <div className="relative">
-        {imageUrl ? (
+        {!imageError && imageLoaded ? (
           <img 
             src={imageUrl} 
             alt={node.title} 
-            className="w-full h-40 object-cover"
-            onError={(e) => {
-              console.error("Failed to load image:", imageUrl);
-              // Fallback to a gradient if image fails to load
-              const target = e.target as HTMLImageElement;
-              target.style.height = '140px';
-              target.style.background = 'linear-gradient(135deg, rgba(123, 104, 238, 0.4), rgba(65, 105, 225, 0.6))';
-              target.style.display = 'flex';
-              target.style.alignItems = 'center';
-              target.style.justifyContent = 'center';
-              target.alt = 'Image could not be loaded';
-            }}
+            className="w-full h-40 object-cover rounded-t-md"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <div 
-            className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-purple-400/30 to-blue-500/40"
-          >
-            Image could not be loaded
+          <div className="w-full h-40 flex flex-col items-center justify-center bg-gradient-to-br from-purple-400/30 to-blue-500/40 rounded-t-md">
+            <ImageIcon className="w-10 h-10 mb-2 text-white/60" />
+            <span className="text-sm text-white/80">Image could not be loaded</span>
+            <span className="text-xs text-white/60 mt-1">{imageUrl ? 'URL not accessible' : 'No image URL available'}</span>
           </div>
         )}
         <div className="absolute top-3 right-3">
