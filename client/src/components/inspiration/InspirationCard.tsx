@@ -70,9 +70,18 @@ const InspirationCard: React.FC<InspirationCardProps> = ({
       return apiRequest('PATCH', `/api/nodes/${node.id}`, updatedNode);
     },
     onSuccess: (data) => {
-      // Invalidate queries and refetch to update the UI
+      // Invalidate and immediately refetch the queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
-      queryClient.refetchQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
+      queryClient.refetchQueries({ 
+        queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'],
+        exact: false,
+        type: 'active', // Only refetch active queries
+      });
+      
+      // Force refresh all queries related to this moodboard
+      setTimeout(() => {
+        queryClient.resetQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
+      }, 100);
       
       // Update local state of the node
       if (data) {
@@ -108,8 +117,18 @@ const InspirationCard: React.FC<InspirationCardProps> = ({
       return apiRequest('DELETE', `/api/nodes/${node.id}`);
     },
     onSuccess: () => {
-      // Invalidate queries
+      // Invalidate and immediately refetch queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
+      queryClient.refetchQueries({ 
+        queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'],
+        exact: false,
+        type: 'active', // Only refetch active queries
+      });
+      
+      // Force refresh all queries related to this moodboard
+      setTimeout(() => {
+        queryClient.resetQueries({ queryKey: ['/api/moodboards', node.moodBoardId, 'nodes'] });
+      }, 100);
       
       // Show success toast
       toast({

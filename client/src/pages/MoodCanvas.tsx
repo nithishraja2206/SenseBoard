@@ -172,8 +172,18 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
   
   // Handle node creation callbacks
   const handleNodeCreated = (nodeId: number) => {
-    // Refetch nodes
+    // Invalidate and immediately refetch nodes
     queryClient.invalidateQueries({ queryKey: ['/api/moodboards', moodBoardId, 'nodes'] });
+    queryClient.refetchQueries({ 
+      queryKey: ['/api/moodboards', moodBoardId, 'nodes'],
+      exact: false,
+      type: 'active', // Only refetch active queries
+    });
+    
+    // Force refresh all queries related to this moodboard
+    setTimeout(() => {
+      queryClient.resetQueries({ queryKey: ['/api/moodboards', moodBoardId, 'nodes'] });
+    }, 100);
     
     toast({
       title: 'Success',
@@ -194,7 +204,19 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
       });
     },
     onSuccess: () => {
+      // Invalidate and immediately refetch queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['/api/projects', moodBoard?.projectId, 'mood-summary'] });
+      queryClient.refetchQueries({ 
+        queryKey: ['/api/projects', moodBoard?.projectId, 'mood-summary'],
+        exact: false,
+        type: 'active', // Only refetch active queries
+      });
+      
+      // Force refresh mood summary
+      setTimeout(() => {
+        queryClient.resetQueries({ queryKey: ['/api/projects', moodBoard?.projectId, 'mood-summary'] });
+      }, 100);
+      
       toast({
         title: 'Mood Updated',
         description: 'Your mood has been recorded for the team.',
