@@ -16,6 +16,16 @@ import AudioRecorder from '@/components/tools/AudioRecorder';
 import ThoughtEditor from '@/components/tools/ThoughtEditor';
 import LinkEmbedder from '@/components/tools/LinkEmbedder';
 import SimpleBreadcrumb from '@/components/ui/Breadcrumb';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface MoodCanvasProps {
   moodBoardId: string;
@@ -246,18 +256,74 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
                   M
                 </div>
               </div>
-              <div className="relative">
-                <button
-                  className="flex items-center gap-1 text-xs bg-secondary/50 rounded-full px-2 py-1 hover:bg-secondary/80 transition-colors"
-                  onClick={() => toast({
-                    title: "Team Collaboration",
-                    description: "This will open the team invitation dialog."
-                  })}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                  Add Team
-                </button>
-              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs bg-secondary/50 rounded-full px-2 py-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                    Add Team
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Invite Team Members</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email Addresses</label>
+                      <input 
+                        type="text" 
+                        placeholder="Enter email addresses separated by commas"
+                        className="w-full p-2 border rounded-md bg-secondary" 
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Permission Level</label>
+                      <select className="w-full p-2 border rounded-md bg-secondary">
+                        <option value="editor">Editor (Can add and modify inspirations)</option>
+                        <option value="viewer">Viewer (Can only view)</option>
+                        <option value="admin">Admin (Full control including user management)</option>
+                      </select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Add a Personal Message (Optional)</label>
+                      <textarea 
+                        className="w-full h-20 p-2 border rounded-md bg-secondary resize-none"
+                        placeholder="Write a personal message to the invitees"
+                      ></textarea>
+                    </div>
+                    
+                    <div className="border border-border p-3 rounded-md bg-secondary/30">
+                      <h4 className="text-sm font-medium mb-2">Or share this invite link</h4>
+                      <div className="flex">
+                        <input
+                          readOnly
+                          className="flex-1 p-2 text-xs bg-background rounded-l-md border border-border"
+                          value={`https://senseboard.design/invite/${moodBoard?.projectId}?code=MTIzNDU2Nzg5`}
+                        />
+                        <Button variant="default" className="rounded-l-none" onClick={() => {
+                          toast({
+                            title: "Link Copied",
+                            description: "Invite link has been copied to clipboard",
+                          });
+                        }}>
+                          Copy
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline">Cancel</Button>
+                    <Button onClick={() => {
+                      toast({
+                        title: "Invitations Sent",
+                        description: "Team members will receive an email invitation shortly.",
+                      });
+                    }}>Send Invitations</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
