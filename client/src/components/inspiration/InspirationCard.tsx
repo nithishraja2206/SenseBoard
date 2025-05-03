@@ -31,6 +31,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import MoodSelector from '@/components/ui/MoodSelector';
 import IntensitySlider from '@/components/ui/IntensitySlider';
+import SimpleImageUploader from '@/components/tools/SimpleImageUploader';
 
 interface InspirationCardProps {
   node: InspirationNode;
@@ -270,6 +271,31 @@ const InspirationCard: React.FC<InspirationCardProps> = ({
                 rows={3}
               />
             </div>
+            
+            {/* Image upload option for image nodes */}
+            {node.type === 'image' && (
+              <div className="space-y-2">
+                <Label>Update Image</Label>
+                <div className="flex flex-col gap-2">
+                  <SimpleImageUploader 
+                    onImageUploaded={(imageUrl: string) => {
+                      updateNodeMutation.mutate({
+                        contentUrl: imageUrl,
+                      });
+                      toast({
+                        title: 'Image Updated',
+                        description: 'The image has been updated successfully.',
+                      });
+                    }}
+                  />
+                  {node.contentUrl && (
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Current image: {node.contentUrl.split('/').pop() || node.contentUrl}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             
             <div className="space-y-2">
               <Label>Mood</Label>

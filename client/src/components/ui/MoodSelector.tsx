@@ -4,11 +4,14 @@ import { MoodType, moodTypes } from '@shared/schema';
 import { Waves, Zap, Target, Sparkles, Shield } from 'lucide-react';
 
 interface MoodSelectorProps {
-  value: MoodType;
+  value?: MoodType;
+  selectedMood?: MoodType;
   onChange: (value: MoodType) => void;
 }
 
-const MoodSelector: React.FC<MoodSelectorProps> = ({ value, onChange }) => {
+const MoodSelector: React.FC<MoodSelectorProps> = ({ value, selectedMood, onChange }) => {
+  // Use selectedMood if provided, otherwise fallback to value
+  const selectedValue = selectedMood || value;
   // Map mood types to icons
   const getMoodIcon = (mood: MoodType) => {
     switch (mood) {
@@ -28,7 +31,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({ value, onChange }) => {
   };
 
   return (
-    <Select value={value} onValueChange={(val) => onChange(val as MoodType)}>
+    <Select value={selectedValue} onValueChange={(val) => onChange(val as MoodType)}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select a mood" />
       </SelectTrigger>
