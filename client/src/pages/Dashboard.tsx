@@ -169,7 +169,6 @@ const Dashboard: React.FC<DashboardProps> = ({ projectId }) => {
         <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
           <SimpleBreadcrumb 
             items={[
-              { label: 'All Projects', href: '/' },
               { label: selectedProject?.name || `Project #${projectId}` }
             ]}
           />

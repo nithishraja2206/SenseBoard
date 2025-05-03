@@ -229,8 +229,9 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
         <div className="bg-background/60 backdrop-blur-sm border-b border-border px-6 py-2 z-10">
           <SimpleBreadcrumb 
             items={[
-              { label: moodBoard.projectId ? `Project: ${project?.name || `Project #${moodBoard.projectId}`}` : 'Project', href: `/project/${moodBoard.projectId}` },
-              { label: `Mood Board: ${moodBoard.name}` }
+              { label: 'Home', href: '/' },
+              { label: project?.name || `Project #${moodBoard.projectId}`, href: `/project/${moodBoard.projectId}` },
+              { label: moodBoard.name }
             ]}
           />
         </div>
