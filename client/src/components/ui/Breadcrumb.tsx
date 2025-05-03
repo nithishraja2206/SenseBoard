@@ -19,7 +19,7 @@ const SimpleBreadcrumb: React.FC<SimpleBreadcrumbProps> = ({ items }) => {
       </Link>
       
       {items.map((item, index) => (
-        <React.Fragment key={index}>
+        <span key={index} className="flex items-center">
           <ChevronRight size={14} className="text-muted-foreground" />
           {item.href ? (
             <Link href={item.href}>
@@ -30,7 +30,7 @@ const SimpleBreadcrumb: React.FC<SimpleBreadcrumbProps> = ({ items }) => {
           ) : (
             <span className="font-medium">{item.label}</span>
           )}
-        </React.Fragment>
+        </span>
       ))}
     </nav>
   );

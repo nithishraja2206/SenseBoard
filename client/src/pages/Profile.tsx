@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { User, Project } from '@shared/schema';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import SimpleBreadcrumb from '@/components/ui/Breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CalendarDays, Clock, Mail, Users, Briefcase } from 'lucide-react';
@@ -58,7 +58,7 @@ const Profile: React.FC<ProfileProps> = () => {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="mb-6">
-        <Breadcrumb 
+        <SimpleBreadcrumb 
           items={[
             { label: 'Profile' }
           ]}
