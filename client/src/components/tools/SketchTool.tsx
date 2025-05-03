@@ -70,10 +70,22 @@ const SketchTool: React.FC<SketchToolProps> = ({
   // Initialize canvas when component mounts
   useEffect(() => {
     if (isOpen && containerRef.current && canvasRef.current) {
-      const cleanup = initCanvas(canvasRef.current, containerRef.current);
-      return cleanup;
+      // Small delay to ensure the DOM is fully rendered
+      const timer = setTimeout(() => {
+        const cleanup = initCanvas(canvasRef.current!, containerRef.current!);
+        
+        // Set initial color and brush size
+        setColor(state.color);
+        setBrushSize(state.brushSize);
+        
+        return cleanup;
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+      };
     }
-  }, [isOpen, initCanvas]);
+  }, [isOpen, initCanvas, state.color, state.brushSize]);
   
   // Handle color selection
   const handleColorChange = (color: string) => {
@@ -96,7 +108,7 @@ const SketchTool: React.FC<SketchToolProps> = ({
       const svgContent = exportAsSVG();
       
       // Create node with the SVG content
-      const response = await apiRequest("POST", "/api/nodes", {
+      const response = await apiRequest<{id: number}>("POST", "/api/nodes", {
         moodBoardId,
         type: "sketch",
         title: values.title,
@@ -115,7 +127,7 @@ const SketchTool: React.FC<SketchToolProps> = ({
       });
       
       // Call the callback if provided
-      if (onSketchCreated) {
+      if (onSketchCreated && response && response.id) {
         onSketchCreated(response.id);
       }
       
@@ -317,8 +329,16 @@ const SketchTool: React.FC<SketchToolProps> = ({
                 </div>
               </div>
               
-              <div ref={containerRef} className="w-full h-64 relative overflow-hidden rounded-md border">
-                <canvas ref={canvasRef} className="absolute inset-0" />
+              <div ref={containerRef} className="w-full h-64 relative overflow-hidden rounded-md border bg-[rgba(30,30,30,0.9)]">
+                <canvas 
+                  ref={canvasRef} 
+                  className="absolute inset-0 w-full h-full touch-none" 
+                  style={{ 
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    touchAction: 'none' 
+                  }}
+                />
               </div>
             </div>
             

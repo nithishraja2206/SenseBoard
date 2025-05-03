@@ -33,45 +33,72 @@ export function useSketchPad() {
   
   // Initialize canvas
   const initCanvas = (canvasElement: HTMLCanvasElement, container: HTMLDivElement) => {
-    if (canvas) return;
+    if (canvas) {
+      canvas.dispose();
+    }
     
     canvasRef.current = canvasElement;
     containerRef.current = container;
     
-    const fabricCanvas = new Canvas(canvasElement, {
-      isDrawingMode: true,
-      width: container.offsetWidth,
-      height: container.offsetHeight,
-      backgroundColor: 'rgba(30, 30, 30, 0.9)',
-    });
+    // Set canvas dimensions explicitly
+    canvasElement.width = container.offsetWidth;
+    canvasElement.height = container.offsetHeight;
     
-    // Setup brush
-    fabricCanvas.freeDrawingBrush = new PencilBrush(fabricCanvas);
-    fabricCanvas.freeDrawingBrush.color = state.color;
-    fabricCanvas.freeDrawingBrush.width = state.brushSize;
-    
-    // Save initial state to history
-    saveToHistory(fabricCanvas);
-    
-    // Handle window resize
-    const resizeCanvas = () => {
-      if (containerRef.current && fabricCanvas) {
-        fabricCanvas.setWidth(containerRef.current.offsetWidth);
-        fabricCanvas.setHeight(containerRef.current.offsetHeight);
-        fabricCanvas.renderAll();
-      }
-    };
-    
-    window.addEventListener('resize', resizeCanvas);
-    
-    // Set state and return cleanup
-    setCanvas(fabricCanvas);
-    
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      fabricCanvas.dispose();
-      setCanvas(null);
-    };
+    try {
+      const fabricCanvas = new Canvas(canvasElement, {
+        isDrawingMode: true,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+        backgroundColor: 'rgba(30, 30, 30, 0.9)',
+        renderOnAddRemove: true,
+        selection: false,
+      });
+      
+      // Setup brush
+      const brush = new PencilBrush(fabricCanvas);
+      brush.color = state.color;
+      brush.width = state.brushSize;
+      fabricCanvas.freeDrawingBrush = brush;
+      
+      // Save initial state to history
+      saveToHistory(fabricCanvas);
+      
+      // Handle window resize
+      const resizeCanvas = () => {
+        if (containerRef.current && fabricCanvas) {
+          const width = containerRef.current.offsetWidth;
+          const height = containerRef.current.offsetHeight;
+          
+          fabricCanvas.setWidth(width);
+          fabricCanvas.setHeight(height);
+          canvasElement.width = width;
+          canvasElement.height = height;
+          fabricCanvas.renderAll();
+        }
+      };
+      
+      // Call resize once to ensure proper dimensions
+      resizeCanvas();
+      
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Set state and return cleanup
+      setCanvas(fabricCanvas);
+      
+      return () => {
+        window.removeEventListener('resize', resizeCanvas);
+        fabricCanvas.dispose();
+        setCanvas(null);
+      };
+    } catch (error) {
+      console.error("Error initializing canvas:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize drawing canvas. Please try again.",
+        variant: "destructive",
+      });
+      return () => {};
+    }
   };
   
   // Save current canvas state to history
@@ -99,8 +126,10 @@ export function useSketchPad() {
   const setMode = (mode: SketchPadMode) => {
     if (!canvas) return;
     
+    // Update state first
     setState(prev => ({ ...prev, mode }));
     
+    // Then apply the changes based on the new mode
     switch (mode) {
       case 'draw':
         canvas.isDrawingMode = true;
@@ -111,6 +140,7 @@ export function useSketchPad() {
         break;
       case 'select':
         canvas.isDrawingMode = false;
+        canvas.selection = true;
         break;
       case 'erase':
         canvas.isDrawingMode = true;
@@ -120,16 +150,23 @@ export function useSketchPad() {
         }
         break;
     }
+    
+    // Force a render to ensure changes are visible
+    canvas.renderAll();
   };
   
   // Set brush color
   const setColor = (color: SketchPadColor) => {
     if (!canvas || !canvas.freeDrawingBrush) return;
     
+    // Update state with the new color
     setState(prev => ({ ...prev, color }));
     
-    if (state.mode === 'draw') {
+    // Apply the color if we're in draw mode
+    const currentMode = state.mode;
+    if (currentMode === 'draw') {
       canvas.freeDrawingBrush.color = color;
+      canvas.renderAll();
     }
   };
   
@@ -139,8 +176,12 @@ export function useSketchPad() {
     
     setState(prev => ({ ...prev, brushSize: size }));
     
-    const brushWidth = state.mode === 'erase' ? size * 2 : size;
+    // Get current mode from state to determine brush width
+    const currentMode = state.mode;
+    const brushWidth = currentMode === 'erase' ? size * 2 : size;
+    
     canvas.freeDrawingBrush.width = brushWidth;
+    canvas.renderAll();
   };
   
   // Clear canvas
