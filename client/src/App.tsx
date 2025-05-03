@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import MoodCanvas from "@/pages/MoodCanvas";
 import FlowMapView from "@/pages/FlowMapView";
+import Profile from "@/pages/Profile";
 import AppLayout from "@/components/layout/AppLayout";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/flowmap/:moodBoardId">
         {(params) => <FlowMapView moodBoardId={params.moodBoardId} />}
       </Route>
+      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );

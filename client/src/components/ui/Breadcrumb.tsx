@@ -13,9 +13,9 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
   return (
     <nav className="flex items-center space-x-2 text-sm">
       <Link href="/">
-        <a className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+        <div className="flex items-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
           <Home size={14} />
-        </a>
+        </div>
       </Link>
       
       {items.map((item, index) => (
@@ -23,9 +23,9 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
           <ChevronRight size={14} className="text-muted-foreground" />
           {item.href ? (
             <Link href={item.href}>
-              <a className={`text-muted-foreground hover:text-foreground transition-colors ${index === items.length - 1 ? 'font-medium text-foreground' : ''}`}>
+              <div className={`text-muted-foreground hover:text-foreground transition-colors cursor-pointer ${index === items.length - 1 ? 'font-medium text-foreground' : ''}`}>
                 {item.label}
-              </a>
+              </div>
             </Link>
           ) : (
             <span className="font-medium">{item.label}</span>

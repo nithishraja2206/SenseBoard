@@ -84,6 +84,18 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
     },
   });
   
+  // Fetch project data once we have the mood board
+  const { data: project, isLoading: isLoadingProject } = useQuery({
+    queryKey: ['/api/projects', moodBoard?.projectId],
+    queryFn: async () => {
+      if (!moodBoard?.projectId) return null;
+      const res = await fetch(`/api/projects/${moodBoard.projectId}`);
+      if (!res.ok) throw new Error('Failed to fetch project');
+      return res.json() as Promise<Project>;
+    },
+    enabled: !!moodBoard?.projectId,
+  });
+  
   // Fetch inspiration nodes
   const { data: nodes = [], isLoading: isLoadingNodes } = useQuery({
     queryKey: ['/api/moodboards', moodBoardId, 'nodes'],
@@ -199,7 +211,7 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({ moodBoardId }) => {
   }, [selectedMood, intensityValue, moodBoard?.projectId]);
   
   // Loading state
-  if (isLoadingMoodBoard) {
+  if (isLoadingMoodBoard || (moodBoard?.projectId && isLoadingProject)) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
