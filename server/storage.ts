@@ -171,10 +171,8 @@ export class MemStorage implements IStorage {
       type: "image",
       title: "Calming Color Palette",
       description: "Soft blues, lavenders, and gentle greens that research shows reduce anxiety and promote mindfulness",
-      content: JSON.stringify({
-        imageUrl: "https://via.placeholder.com/300x200/7B68EE/FFFFFF?text=Calming+Colors"
-      }),
-      contentUrl: null, // Added to match schema
+      content: "{}",
+      contentUrl: "https://images.unsplash.com/photo-1557683311-eac922347aa1?auto=format&fit=crop&w=600&h=400",
       positionX: 100,
       positionY: 150,
       width: 320,
@@ -239,10 +237,8 @@ export class MemStorage implements IStorage {
       type: "image",
       title: "Gesture Mapping Reference",
       description: "Comprehensive set of finger movements that correspond to different meditation actions",
-      content: JSON.stringify({
-        imageUrl: "https://via.placeholder.com/400x300/4A90E2/FFFFFF?text=Gesture+Mapping"
-      }),
-      contentUrl: null, // Added to match schema
+      content: "{}",
+      contentUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?auto=format&fit=crop&w=400&h=300",
       positionX: 150,
       positionY: 180,
       width: 400,
@@ -307,10 +303,8 @@ export class MemStorage implements IStorage {
       type: "image",
       title: "Kyoto Garden Color Analysis",
       description: "Color extraction from traditional Japanese gardens showing how natural elements can be translated into UI components",
-      content: JSON.stringify({
-        imageUrl: "https://via.placeholder.com/600x400/98D8A7/333333?text=Kyoto+Gardens"
-      }),
-      contentUrl: null, // Added to match schema
+      content: "{}",
+      contentUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&h=400",
       positionX: 120,
       positionY: 150,
       width: 400,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { InspirationNode } from '@shared/schema';
 import MoodBadge from '@/components/ui/MoodBadge';
 
@@ -7,33 +7,60 @@ interface ImageCardProps {
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({ node }) => {
-  // Get the image URL from the node and ensure it has the correct path
-  const imageUrl = node.contentUrl || '';
+  const [imageUrl, setImageUrl] = useState<string>('');
   
-  // Properly form the URL by prefixing with the base URL if it's a relative path
-  const formattedImageUrl = imageUrl.startsWith('http') 
-    ? imageUrl 
-    : `${window.location.origin}${imageUrl}`;
+  // Parse content for backward compatibility
+  useEffect(() => {
+    try {
+      // Try to get image URL from contentUrl first (new format)
+      if (node.contentUrl) {
+        // Handle different URL formats
+        if (node.contentUrl.startsWith('http')) {
+          setImageUrl(node.contentUrl);
+        } else {
+          // For relative paths like /uploads/..., make sure they're proper
+          setImageUrl(`${window.location.origin}${node.contentUrl}`);
+        }
+      } 
+      // Fallback to checking content (old format)
+      else if (node.content) {
+        const contentObj = JSON.parse(node.content);
+        if (contentObj && contentObj.imageUrl) {
+          setImageUrl(contentObj.imageUrl);
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing image URL:", error);
+    }
+  }, [node]);
 
   return (
     <div>
       <div className="relative">
-        <img 
-          src={formattedImageUrl} 
-          alt={node.title} 
-          className="w-full h-40 object-cover"
-          onError={(e) => {
-            console.error("Failed to load image:", formattedImageUrl);
-            // Fallback to a gradient if image fails to load
-            const target = e.target as HTMLImageElement;
-            target.style.height = '140px';
-            target.style.background = 'linear-gradient(135deg, rgba(123, 104, 238, 0.4), rgba(65, 105, 225, 0.6))';
-            target.style.display = 'flex';
-            target.style.alignItems = 'center';
-            target.style.justifyContent = 'center';
-            target.alt = 'Image could not be loaded';
-          }}
-        />
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={node.title} 
+            className="w-full h-40 object-cover"
+            onError={(e) => {
+              console.error("Failed to load image:", imageUrl);
+              // Fallback to a gradient if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.height = '140px';
+              target.style.background = 'linear-gradient(135deg, rgba(123, 104, 238, 0.4), rgba(65, 105, 225, 0.6))';
+              target.style.display = 'flex';
+              target.style.alignItems = 'center';
+              target.style.justifyContent = 'center';
+              target.alt = 'Image could not be loaded';
+            }}
+          />
+        ) : (
+          <div 
+            className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-purple-400/30 to-blue-500/40"
+          >
+            Image could not be loaded
+          </div>
+        )}
         <div className="absolute top-3 right-3">
           <MoodBadge mood={node.mood} />
         </div>
