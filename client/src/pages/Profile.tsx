@@ -9,7 +9,7 @@ import {
 import { User, Project } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import SimpleBreadcrumb from "@/components/ui/simpleBreadcrumb";
+import SimpleBreadcrumb from "@/components/ui/SimpleBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarDays, Clock, Mail, Users, Briefcase } from "lucide-react";

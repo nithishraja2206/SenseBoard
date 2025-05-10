@@ -52,7 +52,7 @@ const moodboardSchema = z.object({
   description: z.string().optional(),
 });
 
-const Dashboard: React.FC<DashboardProps> = ({ projectId }) => {
+const Dashboard: any = ({ projectId }: any) => {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

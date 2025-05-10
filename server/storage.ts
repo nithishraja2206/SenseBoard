@@ -597,7 +597,7 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const now = new Date();
-    const user: User = {
+    const user: any = {
       ...insertUser,
       id,
       createdAt: now,
@@ -621,7 +621,7 @@ export class MemStorage implements IStorage {
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = this.projectIdCounter++;
     const now = new Date();
-    const project: Project = {
+    const project: any = {
       ...insertProject,
       id,
       createdAt: now,
@@ -667,7 +667,7 @@ export class MemStorage implements IStorage {
   async createMoodBoard(insertMoodBoard: InsertMoodBoard): Promise<MoodBoard> {
     const id = this.moodBoardIdCounter++;
     const now = new Date();
-    const moodBoard: MoodBoard = {
+    const moodBoard: any = {
       ...insertMoodBoard,
       id,
       createdAt: now,
@@ -717,7 +717,7 @@ export class MemStorage implements IStorage {
   ): Promise<InspirationNode> {
     const id = this.nodeIdCounter++;
     const now = new Date();
-    const node: InspirationNode = {
+    const node: any = {
       ...insertNode,
       id,
       createdAt: now,
@@ -768,7 +768,7 @@ export class MemStorage implements IStorage {
   ): Promise<NodeConnection> {
     const id = this.connectionIdCounter++;
     const now = new Date();
-    const connection: NodeConnection = {
+    const connection: any = {
       ...insertConnection,
       id,
       createdAt: now,
@@ -791,7 +791,7 @@ export class MemStorage implements IStorage {
   async createTeamMood(insertTeamMood: InsertTeamMood): Promise<TeamMood> {
     const id = this.teamMoodIdCounter++;
     const now = new Date();
-    const teamMood: TeamMood = {
+    const teamMood: any = {
       ...insertTeamMood,
       id,
       createdAt: now,
@@ -818,14 +818,20 @@ export class MemStorage implements IStorage {
       summary[mood.mood].total += mood.intensity;
     });
 
-    // Calculate average intensity
+    // Calculate average intensity for each mood
     Object.keys(summary).forEach((mood) => {
-      summary[mood].intensity = Math.round(
-        summary[mood].total / summary[mood].count
-      );
-      delete summary[mood].total;
-    });
+      const entry = summary[mood];
 
+      // Avoid divide-by-zero
+      if (entry.count > 0) {
+        entry.intensity = Math.round(entry.total / entry.count);
+      } else {
+        entry.intensity = 0;
+      }
+
+      // Reset total after use
+      entry.total = 0;
+    });
     return summary;
   }
 }

@@ -22,7 +22,7 @@ import ImageUploader from "@/components/tools/ImageUploader";
 import AudioRecorder from "@/components/tools/AudioRecorder";
 import ThoughtEditor from "@/components/tools/ThoughtEditor";
 import LinkEmbedder from "@/components/tools/LinkEmbedder";
-import SimpleBreadcrumb from "@/components/ui/simpleBreadcrumb";
+import SimpleBreadcrumb from "@/components/ui/SimpleBreadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

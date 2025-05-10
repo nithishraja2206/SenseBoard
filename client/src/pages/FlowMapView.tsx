@@ -12,11 +12,11 @@ import {
 } from "@shared/schema";
 import { moodColors } from "@/lib/mood-utils";
 import { ChevronLeft } from "lucide-react";
-import SimpleBreadcrumb from "@/components/ui/simpleBreadcrumb";
+import SimpleBreadcrumb from "@/components/ui/SimpleBreadcrumb";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
+  DialogDescription,          
   DialogFooter,
   DialogHeader,
   DialogTitle,
