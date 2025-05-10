@@ -17,8 +17,16 @@ function Router() {
       <Route path="/project/:projectId">
         {(params) => <Dashboard projectId={params.projectId} />}
       </Route>
-      <Route path="/moodboard/:moodBoardId">
+      {/* <Route path="/moodboard/:moodBoardId">
         {(params) => <MoodCanvas moodBoardId={params.moodBoardId} />}
+      </Route> */}
+      <Route path="/project/:projectId/moodboard/:moodBoardId">
+        {(params) => (
+          <MoodCanvas
+            projectId={params.projectId}
+            moodBoardId={params.moodBoardId}
+          />
+        )}
       </Route>
       <Route path="/flowmap/:moodBoardId">
         {(params) => <FlowMapView moodBoardId={params.moodBoardId} />}

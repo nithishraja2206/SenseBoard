@@ -17,13 +17,19 @@ const SimpleBreadcrumb: React.FC<SimpleBreadcrumbProps> = ({ items }) => {
           <Home size={14} />
         </div>
       </Link>
-      
+
       {items.map((item, index) => (
         <span key={index} className="flex items-center">
           <ChevronRight size={14} className="text-muted-foreground" />
           {item.href ? (
             <Link href={item.href}>
-              <div className={`text-muted-foreground hover:text-foreground transition-colors cursor-pointer ${index === items.length - 1 ? 'font-medium text-foreground' : ''}`}>
+              <div
+                className={`text-muted-foreground hover:text-foreground transition-colors cursor-pointer ${
+                  index === items.length - 1
+                    ? "font-medium text-foreground"
+                    : ""
+                }`}
+              >
                 {item.label}
               </div>
             </Link>
